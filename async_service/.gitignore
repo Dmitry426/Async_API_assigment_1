@@ -19,4 +19,5 @@ docs_build
 venv
 docs.zip
 archive.zip
-
+packages
+__pycache__/
