@@ -21,3 +21,4 @@ docs.zip
 archive.zip
 packages
 __pycache__/
+.env
