@@ -1,0 +1,22 @@
+services:
+  async_server:
+    build: ./async_service
+    container_name: fast_api_async
+    ports:
+      - "8000:8000"
+
+  redis_server:
+    restart: always
+    image: alpine-redis
+    ports:
+      - "6379:6379"
+
+  nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - web
+    ports:
+      - "80:80"
