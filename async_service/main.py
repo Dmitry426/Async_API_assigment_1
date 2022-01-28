@@ -3,7 +3,7 @@ from core.logger import LOGGING
 from core import config
 from api.api_v1 import film
 import logging
-
+import os
 import aioredis
 import uvicorn
 from elasticsearch import AsyncElasticsearch
