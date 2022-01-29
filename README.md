@@ -12,7 +12,7 @@ This project supports Ubuntu Linux 18.04  It is not tested or supported for the 
 
 ```bash
 $ docker-compose up -d  --bulid 
-
+```
 
 # Notes 
 - Python slim used course some fast api libs been writen on rust 
