@@ -1,16 +1,19 @@
 services:
   async_server:
     build: ./async_service
-    container_name: fast_api_async
-    command: python3 main.py
+    command:  python main.py
     env_file:
       - ./.env
-    ports:
-      - "8000:8000"
+    depends_on:
+      - redis_server
+    expose:
+      - 8000
 
   redis_server:
     restart: always
-    image: 'bitnami/redis:latest'
+    image: 'redis:alpine'
+    env_file:
+      - ./.env
     ports:
       - "6379:6379"
 
@@ -19,6 +22,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/configs:/etc/nginx/conf.d:ro
-
+    depends_on:
+      - async_server
     ports:
       - "80:80"
