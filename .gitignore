@@ -22,3 +22,26 @@ archive.zip
 packages
 __pycache__/
 .env
+<<<<<<< HEAD
+*~
+*.userprefs
+*.pidb
+*.pyc
+*.sw[po]
+*.egg-info/
+data_es/*
+data/*
+.env
+env?
+.idea
+.tox
+.vscode/
+rel
+wheels
+packages
+__pycache__/
+etl_index/
+data_postgres
+data_es
+=======
+>>>>>>> origin/main

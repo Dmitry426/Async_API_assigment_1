@@ -15,6 +15,12 @@ $ docker-compose up -d  --bulid
 ```
 
 # Notes 
+<<<<<<< HEAD
+- Python  course uvicorn using specific dependencies
+- In order to run Alpine version all orjson dependecies mast be in reqirements.txt 
+- Uvicorn is run from main.py in order to use custom logger  .
+=======
 - Python slim used course some fast api libs been writen on rust 
 - In order to run Alpine version all orjson dependecies mast be in reqirements.txt  
 - Uvicorn is run from main.py in order to use castom logger  .
+>>>>>>> origin/main

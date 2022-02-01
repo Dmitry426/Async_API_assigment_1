@@ -1,0 +1,21 @@
+{
+  "film_work_pg": {
+    "state_file_path": "./state/state.json",
+    "limit": 1000,
+    "elastic_port": "http://localhost:9200",
+    "film_work_state_field":"film_work_updated_at",
+    "genres_state_field":"genres_updated_at",
+    "persons_state_field":"persons_updated_at",
+    "sql_query_film_work_by_id": "SELECT\n    fw.id as film_id, \n  fw.title, \n    fw.description, \n    fw.rating, \n     fw.updated_at as updated_at, \n    pfw.role, \n    p.id as person_id, \n    p.full_name,\n    g.name as genre \nFROM content.film_work fw\nLEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id\nLEFT JOIN content.person p ON p.id = pfw.person_id\nLEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id\nLEFT JOIN content.genre g ON g.id = gfw.genre_id\n WHERE fw.id IN %s ORDER BY updated_at ; ",
+
+    "sql_query_film_work_by_updated_at": "SELECT\n    fw.id as film_id, \n    fw.title, \n    fw.description, \n    fw.rating, \n     fw.updated_at as updated_at, \n    pfw.role, \n    p.id as person_id, \n    p.full_name,\n    g.name as genre \nFROM content.film_work fw\nLEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id\nLEFT JOIN content.person p ON p.id = pfw.person_id\nLEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id\nLEFT JOIN content.genre g ON g.id = gfw.genre_id\n {} ",
+
+    "sql_query_persons":"SELECT id, updated_at\nFROM content.person\n {}",
+
+    "sql_query_person_film_work": "SELECT fw.id, fw.updated_at\nFROM content.film_work fw\nLEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id\nWHERE pfw.person_id IN %s \nORDER BY fw.updated_at\nLIMIT 1000; ",
+
+    "sql_query_genres":" SELECT id , updated_at \n FROM content.genre \n {} ",
+
+    "sql_query_genre_film_work":"SELECT fw.id , fw.updated_at \n FROM content.film_work fw \n LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id \n WHERE gfw.genre_id IN %s \n ORDER BY updated_at \n LIMIT 1000"
+  }
+}
