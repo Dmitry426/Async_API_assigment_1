@@ -59,8 +59,6 @@ services:
     restart: always
 >>>>>>> origin/main
     image: 'redis:alpine'
-    env_file:
-      - ./.env
     ports:
       - "6379:6379"
 <<<<<<< HEAD
