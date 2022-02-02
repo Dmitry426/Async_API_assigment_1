@@ -17,3 +17,4 @@ WORKDIR $APP_HOME
 COPY . .
 
 CMD ["python"  , "main.py"]
+
