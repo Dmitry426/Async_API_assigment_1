@@ -27,7 +27,7 @@ class Film(BaseModel):
     genre: Optional[List[GenreFilmWork]]
     title: str = None
     description: str = None
-    director: str = None
+    directors: Optional[List[PersonFilmWork]]
     actors_names: Optional[List[str]]
     writers_names: Optional[List[str]]
     actors: Optional[List[PersonFilmWork]]
