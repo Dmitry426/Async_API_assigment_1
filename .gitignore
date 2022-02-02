@@ -22,7 +22,6 @@ archive.zip
 packages
 __pycache__/
 .env
-<<<<<<< HEAD
 *~
 *.userprefs
 *.pidb
@@ -43,5 +42,3 @@ __pycache__/
 etl_index/
 data_postgres
 data_es
-=======
->>>>>>> origin/main

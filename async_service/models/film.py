@@ -16,10 +16,15 @@ class PersonFilmWork(BaseModel):
     name: str
 
 
+class GenreFilmWork(BaseModel):
+    genre: str
+    id: UUID
+
+
 class Film(BaseModel):
     id: UUID
     imdb_rating: float = None
-    genre: List[str]
+    genre: Optional[List[GenreFilmWork]]
     title: str = None
     description: str = None
     director: str = None

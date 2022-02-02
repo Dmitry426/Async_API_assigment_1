@@ -25,10 +25,12 @@ persons_state_field = fw_config.persons_state_field
 load_dotenv()
 dsl = DSNSettings().dict()
 
+
 def load_loger():
     logging.basicConfig(
         filename="es.log", filemode="w", format="%(name)s - %(levelname)s - %(message)s"
     )
+
 
 @backoff.on_exception(backoff.expo, OperationalError, max_time=60)
 def migrate_to_etl():
@@ -54,6 +56,7 @@ def migrate_to_etl():
             person_genre_fw_query=sql_query_person_film_work,
             state_filed_name=persons_state_field,
         )
+
 
 if __name__ == "__main__":
     load_loger()

@@ -7,9 +7,11 @@ from services.film import FilmService, get_film_service
 
 router = APIRouter()
 
+
 class Film(BaseModel):
     id: str
     title: str
+
 
 @router.get("/{film_id}", response_model=Film)
 async def film_details(

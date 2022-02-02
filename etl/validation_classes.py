@@ -65,4 +65,3 @@ class FilmWork(BaseModel):
         if not variable:
             return None
         return variable
-

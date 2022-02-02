@@ -36,6 +36,7 @@ async def shutdown():
     await redis.redis.close()
     await elastic.es.close()
 
+
 app.include_router(film.router, prefix="/api/api_v1/film", tags=["film"])
 
 if __name__ == "__main__":
