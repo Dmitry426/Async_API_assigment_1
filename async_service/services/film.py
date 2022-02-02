@@ -1,13 +1,13 @@
 from functools import lru_cache
-from typing import Optional
+from typing import List, Optional
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
-from fastapi import Depends
-
 from db.elastic import get_elastic
 from db.redis import get_redis
+from elasticsearch import AsyncElasticsearch
+from fastapi import Depends
 from models.film import Film
+from pydantic.validators import UUID
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
@@ -18,22 +18,37 @@ class FilmService:
         self.elastic = elastic
 
     async def get_by_id(self, film_id: str) -> Optional[Film]:
-
         film = await self._film_from_cache(film_id)
-        if not film:
 
+        if not film:
             film = await self._get_film_from_elastic(film_id)
             if not film:
-
                 return None
-
             await self._put_film_to_cache(film)
 
         return film
 
+    async def get_list(
+            self, sort: str, page_size: int, page_number: int, genre_id: Optional[UUID]
+    ) -> List[Film]:
+
+        if genre_id:
+            body = {"query": {"filter": {"term": {"genres.id": genre_id}}}}
+        else:
+            body = {"query": {"match_all": {}}}
+
+        offset = (page_number - 1) * page_size
+        order = "desc" if sort[0] == "-" else "asc"
+        order_field = sort.replace("-", "")
+
+        result = await self.elastic.search(
+            body=body, index="movies", form=offset, size=page_size, sort=f"{order_field}:{order}"
+            )
+        return [Film(**film["_source"]) for film in result["hits"]["hits"]]
+
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
-        doc = await self.elastic.get('movies', film_id)
-        return Film(**doc['_source'])
+        doc = await self.elastic.get("movies", film_id)
+        return Film(**doc["_source"])
 
     async def _film_from_cache(self, film_id: str) -> Optional[Film]:
         data = await self.redis.get(film_id)
@@ -44,7 +59,6 @@ class FilmService:
         return film
 
     async def _put_film_to_cache(self, film: Film):
-
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
