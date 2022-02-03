@@ -1,21 +1,56 @@
 services:
+  etl:
+    build: ./etl
+    env_file:
+      - ./.env
+    links:
+      - postgres
+      - es01
+
   async_server:
     build: ./async_service
-    command:  python main.py
+    command: python main.py
     env_file:
       - ./.env
     depends_on:
+      - es01
       - redis_server
     expose:
       - 8000
 
-  redis_server:
+  postgres:
+    image: postgres:13.0-alpine
+    volumes:
+      - ./data_postgres:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_NAME}
+    ports:
+      - "5432:5432"
     restart: always
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    user: $USER
+    container_name: es01
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+    volumes:
+      - ./data_es:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  redis_server:
     image: 'redis:alpine'
     env_file:
       - ./.env
     ports:
       - "6379:6379"
+    restart: always
 
   nginx:
     image: nginx:1.19.2
