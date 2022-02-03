@@ -5,6 +5,7 @@ from aioredis import Redis
 from db.elastic import get_elastic
 from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch
+from elasticsearch_dsl import Q, Search
 from fastapi import Depends
 from models.film import Film
 from pydantic.validators import UUID
@@ -29,22 +30,26 @@ class FilmService:
         return film
 
     async def get_list(
-            self, sort: str, page_size: int, page_number: int, genre_id: Optional[UUID]
+            self, sort: Optional[str], page_size: int, page_number: int, genre_id: Optional[UUID], query: Optional[str]
     ) -> List[Film]:
 
+        search = Search(using=self.elastic)
+
+        if query:
+            search = search.query("multi_match", query=query, fields=["title, description"])
+
         if genre_id:
-            body = {"query": {"filter": {"term": {"genres.id": genre_id}}}}
-        else:
-            body = {"query": {"match_all": {}}}
+            search = search.query("nested", path="genres", query=Q("term", genres__id=genre_id))
 
-        offset = (page_number - 1) * page_size
-        order = "desc" if sort[0] == "-" else "asc"
-        order_field = sort.replace("-", "")
+        if sort:
+            search = search.sort(sort)
 
-        result = await self.elastic.search(
-            body=body, index="movies", form=offset, size=page_size, sort=f"{order_field}:{order}"
-            )
-        return [Film(**film["_source"]) for film in result["hits"]["hits"]]
+        start = (page_number - 1) * page_size
+        end = start + page_size
+
+        result = await search[start:end].execute()
+
+        return [Film(**hit.to_dict()) for hit in result]
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         doc = await self.elastic.get("movies", film_id)
