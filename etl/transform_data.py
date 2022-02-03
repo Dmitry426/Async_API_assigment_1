@@ -6,10 +6,12 @@ class Data_Merger:
         self.desired_structure = {
             "id": "",
             "imdb_rating": "",
-            "genre": [],
+            "genre":[],
+            "genres": [],
             "title": "",
             "description": "",
-            "director": "",
+            'director':[],
+            "directors":  [],
             "actors_names": [],
             "writers_names": [],
             "writers": [],
@@ -47,12 +49,20 @@ class Data_Merger:
     def __merging_conditions(self, obj: dict):
         """Merging conditions for actors, directors and writes fields"""
         if obj["genre"] not in self.desired_structure["genre"]:
-            self.desired_structure["genre"].append(obj["genre"])
+            self.desired_structure["genre"].append(obj["genre"]),
+            self.desired_structure["genres"].append(
+                {"id": obj["genre_id"], "genre": obj["genre"]}
+            )
+
         if (
             obj["role"] == "director"
-            and obj["full_name"] != self.desired_structure["director"]
+            and obj["full_name"] not in self.desired_structure["director"]
         ):
-            self.desired_structure["director"] = obj["full_name"]
+            self.desired_structure["director"].append(obj["full_name"])
+            self.desired_structure["directors"].append(
+                {"id": obj["person_id"], "name": obj["full_name"]}
+            )
+
         if (
             obj["role"] == "actor"
             and obj["full_name"] not in self.desired_structure["actors_names"]
@@ -76,9 +86,11 @@ class Data_Merger:
             "id": "",
             "imdb_rating": "",
             "genre": [],
+            "genres": [],
             "title": "",
             "description": "",
-            "director": "",
+            'director': [],
+            "directors": [],
             "actors_names": [],
             "writers_names": [],
             "writers": [],
