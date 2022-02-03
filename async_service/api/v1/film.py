@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -32,7 +32,16 @@ async def film_list(
         film_service: FilmService = Depends(get_film_service),
         sort: str = Query("-imdb_rating"), page_size: int = Query(50, alias="page[size]"),
         page_number: int = Query(1, alias="page[number]"),
-        filter_genre: Optional[UUID] = Query(..., alias="filter[genre]")
-        ) -> Film:
+        filter_genre: Optional[UUID] = Query(None, alias="filter[genre]")
+        ) -> List[Film]:
     films = await film_service.get_list(sort, page_size, page_number, filter_genre)
+    return films
+
+
+@router.get("/search", response_model=Film)
+async def film_search(
+    query: str, film_service: FilmService = Depends(get_film_service), page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]")
+):
+    films = await film_service.get_list(page_size=page_size, page_number=page_number, query=query)
     return films
