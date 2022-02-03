@@ -37,30 +37,35 @@ class Config(BaseModel):
     film_work_pg: PostgresSettings
 
 
-class Person(BaseModel):
-    id: UUID
-    name: str
-
-
 class Datetime_serialization(BaseModel):
     persons_updated_at: Optional[datetime] = None
     genres_updated_at: Optional[datetime] = None
     film_work_updated_at: Optional[datetime] = None
 
 
+class PersonFilmWork(BaseModel):
+    id: UUID
+    name: str
+
+
+class GenreFilmWork(BaseModel):
+    id: UUID
+    genre: str
+
+
 class FilmWork(BaseModel):
     id: UUID
     imdb_rating: float = None
-    genre: List[str]
+    genres: Optional[List[GenreFilmWork]]
     title: str = None
     description: str = None
-    director: str = None
+    directors: Optional[List[PersonFilmWork]]
     actors_names: Optional[List[str]]
     writers_names: Optional[List[str]]
-    actors: Optional[List[Person]]
-    writers: Optional[List[Person]]
+    actors: Optional[List[PersonFilmWork]]
+    writers: Optional[List[PersonFilmWork]]
 
-    @validator("director", "description", "title")
+    @validator("description", "title")
     def handle_empty_str(cls, variable: str) -> str:
         if not variable:
             return None
