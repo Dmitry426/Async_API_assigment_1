@@ -24,7 +24,7 @@ class GenreFilmWork(BaseModel):
 class Film(BaseModel):
     id: UUID
     imdb_rating: float = None
-    genre: Optional[List[GenreFilmWork]]
+    genres: Optional[List[GenreFilmWork]]
     title: str = None
     description: str = None
     directors: Optional[List[PersonFilmWork]]
