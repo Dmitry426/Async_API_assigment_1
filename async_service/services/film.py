@@ -5,6 +5,7 @@ from aioredis import Redis
 from db.elastic import get_elastic
 from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch
+from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Q, Search
 from fastapi import Depends
 from models.film import Film
@@ -18,11 +19,15 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, film_id: str) -> Optional[Film]:
-        film = await self._film_from_cache(film_id)
+    async def get_by_id(self, film_id: UUID) -> Optional[Film]:
+        film = await self._film_from_cache(str(film_id))
 
         if not film:
-            film = await self._get_film_from_elastic(film_id)
+            try:
+                film = await self._get_film_from_elastic(film_id)
+            except NotFoundError:
+                film = None
+
             if not film:
                 return None
             await self._put_film_to_cache(film)
@@ -30,13 +35,13 @@ class FilmService:
         return film
 
     async def get_list(
-            self, sort: Optional[str], page_size: int, page_number: int, genre_id: Optional[UUID], query: Optional[str]
+            self, page_size: int, page_number: int, sort: Optional[str] = None,
+            genre_id: Optional[UUID] = None, query: Optional[str] = None
     ) -> List[Film]:
 
         search = Search(using=self.elastic)
-
         if query:
-            search = search.query("multi_match", query=query, fields=["title, description"])
+            search = search.query(Q("match", title={"query": query, "fuzziness": "auto"}))
 
         if genre_id:
             search = search.query("nested", path="genres", query=Q("term", genres__id=genre_id))
@@ -47,11 +52,13 @@ class FilmService:
         start = (page_number - 1) * page_size
         end = start + page_size
 
-        result = await search[start:end].execute()
+        search = search[start:end]
+        body = search.to_dict()
+        result = await self.elastic.search(index="movies", body=body)
 
-        return [Film(**hit.to_dict()) for hit in result]
+        return [Film(**hit["_source"]) for hit in result["hits"]["hits"]]
 
-    async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
+    async def _get_film_from_elastic(self, film_id: UUID) -> Optional[Film]:
         doc = await self.elastic.get("movies", film_id)
         return Film(**doc["_source"])
 
@@ -64,7 +71,7 @@ class FilmService:
         return film
 
     async def _put_film_to_cache(self, film: Film):
-        await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(str(film.id), film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
