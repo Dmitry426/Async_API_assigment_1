@@ -10,9 +10,6 @@ services:
   async_server:
     build: ./async_service
     command: python main.py
-    depends_on:
-      - es01
-      - redis_server
     env_file:
       - ./.env
     expose:

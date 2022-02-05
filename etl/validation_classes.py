@@ -30,7 +30,6 @@ class PostgresSettings(BaseModel):
     sql_query_person_film_work: str
     sql_query_genre_film_work: str
     sql_query_film_work_by_updated_at: str
-    elastic_port: str
 
 
 class Config(BaseModel):

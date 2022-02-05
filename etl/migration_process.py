@@ -34,7 +34,6 @@ class MainProcess:
             ),
             [],
         ):
-            print(loaded)
             parsed_data = self.transform_data.handle_merge_cases(query_data=loaded)
             self._es_upload_butch(data=parsed_data)
             self.state.validate_save_timestamp(
