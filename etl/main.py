@@ -1,15 +1,15 @@
 import logging
+import time
 
 import backoff
 import psycopg2
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv
 from psycopg2 import OperationalError
+import schedule
 
 from validation_classes import Config, DSNSettings
 from migration_process import FilmWorkProcess, PersonGenreProcess
-import schedule
-import time
 
 config = Config.parse_file("config.json")
 fw_config = config.film_work_pg
