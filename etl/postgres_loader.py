@@ -14,7 +14,7 @@ class Load_data:
             state_field_name=state_field_name
         )
         if self.parsed_state[state_field_name] is None:
-            sql_query_params = f""" 
+            sql_query_params = f"""
             ORDER BY updated_at
             LIMIT {limit};
         """
@@ -23,7 +23,7 @@ class Load_data:
             self.parsed_state[state_field_name]
             and state_field_name == "film_work_updated_at"
         ):
-            sql_query_params = f""" 
+            sql_query_params = f"""
             WHERE fw.updated_at > ('%s')
             ORDER BY updated_at
             LIMIT {limit};
@@ -33,7 +33,7 @@ class Load_data:
             return sql_query_params
 
         if self.parsed_state[state_field_name]:
-            sql_query_params = f""" 
+            sql_query_params = f"""
                WHERE updated_at > ('%s')
                ORDER BY updated_at
                LIMIT {limit};

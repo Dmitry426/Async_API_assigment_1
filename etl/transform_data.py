@@ -6,11 +6,11 @@ class Data_Merger:
         self.desired_structure = {
             "id": "",
             "imdb_rating": "",
-            "genre":[],
+            "genre": [],
             "genres": [],
             "title": "",
             "description": "",
-            'director':[],
+            "director": [],
             "directors":  [],
             "actors_names": [],
             "writers_names": [],

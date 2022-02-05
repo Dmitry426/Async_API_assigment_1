@@ -1,11 +1,11 @@
 import logging
 
-from psycopg2 import OperationalError, DatabaseError
+from psycopg2 import DatabaseError, OperationalError
 
-from postgres_loader import Load_data
-from transform_data import Data_Merger
 from etl_uploader import Upload_batch
+from postgres_loader import Load_data
 from state_operator import State_operator
+from transform_data import Data_Merger
 
 
 class MainProcess:

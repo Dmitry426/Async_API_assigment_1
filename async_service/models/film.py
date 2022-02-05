@@ -1,10 +1,8 @@
-from logging import RootLogger
-import orjson
-from typing import Optional, List
-from async_service.models import genres
+from typing import List, Optional
 
-from pydantic.validators import UUID
+import orjson
 from pydantic import BaseModel
+from pydantic.validators import UUID
 
 
 def orjson_dumps(v, *, default):

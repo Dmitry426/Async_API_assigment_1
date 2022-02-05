@@ -1,9 +1,8 @@
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, BaseSettings, Field, validator
 from pydantic.validators import UUID
-from pydantic import BaseSettings, Field
 
 
 class DSNSettings(BaseSettings):
