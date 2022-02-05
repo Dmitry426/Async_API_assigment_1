@@ -1,8 +1,7 @@
 {
   "film_work_pg": {
-    "state_file_path": "./state/state.json",
+    "state_file_path": "./film_work_state.json",
     "limit": 1000,
-    "elastic_port": "http://localhost:9200",
     "film_work_state_field": "film_work_updated_at",
     "genres_state_field": "genres_updated_at",
     "persons_state_field": "persons_updated_at",
@@ -12,5 +11,16 @@
     "sql_query_person_film_work": "SELECT fw.id, fw.updated_at\nFROM content.film_work fw\nLEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id\nWHERE pfw.person_id IN %s \nORDER BY fw.updated_at\nLIMIT 1000; ",
     "sql_query_genres": " SELECT id , updated_at \n FROM content.genre \n {} ",
     "sql_query_genre_film_work": "SELECT fw.id , fw.updated_at \n FROM content.film_work fw \n LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id \n WHERE gfw.genre_id IN %s \n ORDER BY updated_at \n LIMIT 1000"
+  },
+  "person_pg": {
+    "state_file_path": "./person_state.json",
+    "limit": 1000,
+    "order_field": "updated_at",
+    "state_field": "updated_at",
+    "producer_queries": [
+      "SELECT id, updated_at FROM content.film_work",
+      "SELECT id, updated_at FROM content.person",
+      "SELECT id, updated_at FROM content.genre"
+    ]
   }
 }
