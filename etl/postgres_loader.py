@@ -20,8 +20,8 @@ class Load_data:
         """
             return sql_query_params
         if (
-            self.parsed_state[state_field_name]
-            and state_field_name == "film_work_updated_at"
+                self.parsed_state[state_field_name]
+                and state_field_name == "film_work_updated_at"
         ):
             sql_query_params = f""" 
             WHERE fw.updated_at > ('%s')
