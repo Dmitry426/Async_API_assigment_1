@@ -41,11 +41,7 @@ async def film_details(
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
 
-    return FilmDetail(
-        id=film.id, title=film.title, imdb_rating=film.imdb_rating,
-        description=film.description, genres=film.genres, actors=film.actors,
-        writers=film.writers, directors=film.directors
-        )
+    return film
 
 
 @router.get("/", response_model=List[FilmList])
