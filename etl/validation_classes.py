@@ -30,7 +30,6 @@ class PostgresSettings(BaseModel):
     sql_query_person_film_work: str
     sql_query_genre_film_work: str
     sql_query_film_work_by_updated_at: str
-    elastic_port: str
 
 
 class Config(BaseModel):
@@ -43,27 +42,22 @@ class Datetime_serialization(BaseModel):
     film_work_updated_at: Optional[datetime] = None
 
 
-class PersonFilmWork(BaseModel):
+class PersonGenreObj(BaseModel):
     id: UUID
     name: str
-
-
-class GenreFilmWork(BaseModel):
-    id: UUID
-    genre: str
 
 
 class FilmWork(BaseModel):
     id: UUID
     imdb_rating: float = None
-    genres: Optional[List[GenreFilmWork]]
+    genres: Optional[List[PersonGenreObj]]
     title: str = None
     description: str = None
-    directors: Optional[List[PersonFilmWork]]
+    directors: Optional[List[PersonGenreObj]]
     actors_names: Optional[List[str]]
     writers_names: Optional[List[str]]
-    actors: Optional[List[PersonFilmWork]]
-    writers: Optional[List[PersonFilmWork]]
+    actors: Optional[List[PersonGenreObj]]
+    writers: Optional[List[PersonGenreObj]]
 
     @validator("description", "title")
     def handle_empty_str(cls, variable: str) -> str:
