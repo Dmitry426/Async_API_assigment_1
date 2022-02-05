@@ -10,11 +10,11 @@ services:
   async_server:
     build: ./async_service
     command: python main.py
-    env_file:
-      - ./.env
     depends_on:
       - es01
       - redis_server
+    env_file:
+      - ./.env
     expose:
       - 8000
 
@@ -34,7 +34,6 @@ services:
 
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
-    user: $USER
     container_name: es01
     environment:
       - node.name=es01
