@@ -30,3 +30,22 @@ class FilmWork(BaseModel):
     @validator("description", "title")
     def handle_empty_str(cls, variable: str) -> str:
         return variable if variable else None
+
+
+class PersonFilmWorkWithRating(BaseModel):
+    id: UUID
+    name: str
+    imdb_rating: Optional[float] = None
+
+
+class Person(BaseModel):
+    id: UUID
+    full_name: str
+    role: List[str]
+    film_works: List[PersonFilmWorkWithRating]
+
+
+class Genre(BaseModel):
+    id: UUID
+    name: str
+    film_works: List[PersonFilmWorkWithRating]

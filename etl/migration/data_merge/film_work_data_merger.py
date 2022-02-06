@@ -38,7 +38,7 @@ class FilmWorkDataMerger:
         return validated_result
 
     def handle_merge_cases(self, query_result: list):
-        """Method to merge datatables by id ,since Data is requested using Left Joins"""
+        """Method to data_merge datatables by id ,since Data is requested using Left Joins"""
         logger.debug('DataMerger.handle_merge_cases()')
 
         for index, element in enumerate(query_result):

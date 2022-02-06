@@ -9,9 +9,6 @@ class PersonGenreProcess(MainProcess):
     """Class for postgres to ETL migration aimed to migrate
     persons or genres tables by updated_at"""
 
-    def __iter__(self, config, postgres_connection):
-        super().__init__(config, postgres_connection)
-
     def migrate(
             self,
             person_or_genre_query: str,

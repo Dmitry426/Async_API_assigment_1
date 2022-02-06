@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import backoff
 from elasticsearch import (
@@ -20,8 +21,9 @@ class UploadBatch:
         self.request_body = None
 
     def _create_index(self):
+        current_path = Path('./migration/es_upload').absolute()
         try:
-            with open(f'index_schemas/{self.current_index}.json') as json_file:
+            with open(current_path / f'index_schemas/{self.current_index}.json') as json_file:
                 self.request_body = json.load(json_file)
         except FileNotFoundError as e:
             logger.exception(e)
