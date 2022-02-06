@@ -7,9 +7,11 @@ from elasticsearch.helpers import bulk
 from elasticsearch import ConnectionError
 
 
+
 class Upload_batch:
-    def __init__(self):
-        self.es = Elasticsearch(hosts=[{"host": "es01", "port": "9200"}])
+    def __init__(self, es_dsn):
+        self.es_dsn = es_dsn
+        self.es = Elasticsearch(hosts=[{"host": self.es_dsn.host, "port": self.es_dsn.port}])
         self.logger = logging.getLogger("migrate_etl")
         self.request_body = None
 
