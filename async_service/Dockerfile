@@ -12,5 +12,3 @@ ENV APP_HOME=/home/async_service/
 WORKDIR $APP_HOME
 
 COPY . .
-
-

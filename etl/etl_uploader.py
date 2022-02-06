@@ -2,15 +2,14 @@ import json
 import logging
 
 import backoff
-from elasticsearch import Elasticsearch, ElasticsearchException
+from elasticsearch import ConnectionError, Elasticsearch, ElasticsearchException
 from elasticsearch.helpers import bulk
-from elasticsearch import ConnectionError
 
 
 class Upload_batch:
-    def __init__(self, config):
-        self.config = config
-        self.es = Elasticsearch(self.config.elastic_port)
+    def __init__(self, es_dsn):
+        self.es_dsn = es_dsn
+        self.es = Elasticsearch(hosts=[{"host": self.es_dsn.host, "port": self.es_dsn.port}])
         self.logger = logging.getLogger("migrate_etl")
         self.request_body = None
 

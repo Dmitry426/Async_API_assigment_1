@@ -55,7 +55,7 @@
           "id": {
             "type": "keyword"
           },
-          "genre": {
+          "name": {
             "type": "text",
             "analyzer": "ru_en"
           }
