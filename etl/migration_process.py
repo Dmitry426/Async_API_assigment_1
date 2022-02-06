@@ -1,12 +1,14 @@
 import logging
 
 from psycopg2 import OperationalError, DatabaseError
+from dotenv import load_dotenv
 
 from postgres_loader import Load_data
 from transform_data import Data_Merger
 from etl_uploader import Upload_batch
 from state_operator import State_operator
 
+load_dotenv()
 
 class MainProcess:
     """
@@ -24,7 +26,7 @@ class MainProcess:
         self.sql_query_film_work_by_id = self.config.sql_query_film_work_by_id
 
     def _es_upload_butch(self, data: dict):
-        es = Upload_batch()
+        es = Upload_batch(es_dsn=self.config.es_dsn())
         es.es_push_butch(data=data)
 
     def _film_work_process(self, cursor, film_work_query, state_field_name):
