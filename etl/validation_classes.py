@@ -6,19 +6,27 @@ from pydantic.validators import UUID
 from pydantic import BaseSettings, Field
 
 
-class DSNSettings(BaseSettings):
+
+
+
+class PostgresDSNSettings(BaseSettings):
     host: str = Field(..., env="POSTGRES_HOST")
-    port: str = Field(..., env="POSTGRES_PORT")
+    port: int = Field(..., env="POSTGRES_PORT")
     dbname: str = Field(..., env="POSTGRES_DB")
     password: str = Field(..., env="POSTGRES_PASSWORD")
     user: str = Field(..., env="POSTGRES_USER")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+
+
+class ElasticDSNSettings(BaseSettings):
+    host: str = Field(..., env="ELASTIC_HOST")
+    port: int = Field(..., env="ELASTIC_PORT")
+
 
 
 class PostgresSettings(BaseModel):
+    dsn = PostgresDSNSettings
+    es_dsn= ElasticDSNSettings
     limit: Optional[int]
     film_work_state_field: str
     genres_state_field: str
@@ -34,6 +42,7 @@ class PostgresSettings(BaseModel):
 
 class Config(BaseModel):
     film_work_pg: PostgresSettings
+
 
 
 class Datetime_serialization(BaseModel):
