@@ -3,13 +3,13 @@ import time
 
 import backoff
 import psycopg2
-from psycopg2.extras import DictCursor
+import schedule
 from dotenv import load_dotenv
 from psycopg2 import OperationalError
-import schedule
+from psycopg2.extras import DictCursor
 
-from validation_classes import Config
 from migration_process import FilmWorkProcess, PersonGenreProcess
+from validation_classes import Config
 
 load_dotenv()
 
@@ -23,9 +23,6 @@ sql_query_genre_film_work = fw_config.sql_query_genre_film_work
 film_work_state_field = fw_config.film_work_state_field
 genres_state_field = fw_config.genres_state_field
 persons_state_field = fw_config.persons_state_field
-
-
-
 
 
 def load_loger():

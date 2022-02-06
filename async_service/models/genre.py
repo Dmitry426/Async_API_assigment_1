@@ -1,6 +1,6 @@
 import orjson
-from pydantic.validators import UUID
 from pydantic import BaseModel
+from pydantic.validators import UUID
 
 
 def orjson_dumps(v, *, default):

@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import List, Optional
 
 import orjson
-from pydantic.validators import UUID
 from pydantic import BaseModel
+from pydantic.validators import UUID
 
 
 def orjson_dumps(v, *, default):
@@ -12,6 +12,7 @@ def orjson_dumps(v, *, default):
 class PersonGenreFilm(BaseModel):
     id: UUID
     name: str
+
 
 class Film(BaseModel):
     id: UUID

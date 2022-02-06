@@ -1,12 +1,8 @@
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, BaseSettings, Field, validator
 from pydantic.validators import UUID
-from pydantic import BaseSettings, Field
-
-
-
 
 
 class PostgresDSNSettings(BaseSettings):
@@ -17,16 +13,14 @@ class PostgresDSNSettings(BaseSettings):
     user: str = Field(..., env="POSTGRES_USER")
 
 
-
 class ElasticDSNSettings(BaseSettings):
     host: str = Field(..., env="ELASTIC_HOST")
     port: int = Field(..., env="ELASTIC_PORT")
 
 
-
 class PostgresSettings(BaseModel):
     dsn = PostgresDSNSettings
-    es_dsn= ElasticDSNSettings
+    es_dsn = ElasticDSNSettings
     limit: Optional[int]
     film_work_state_field: str
     genres_state_field: str
@@ -42,7 +36,6 @@ class PostgresSettings(BaseModel):
 
 class Config(BaseModel):
     film_work_pg: PostgresSettings
-
 
 
 class Datetime_serialization(BaseModel):

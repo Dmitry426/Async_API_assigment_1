@@ -2,10 +2,8 @@ import json
 import logging
 
 import backoff
-from elasticsearch import Elasticsearch, ElasticsearchException
+from elasticsearch import ConnectionError, Elasticsearch, ElasticsearchException
 from elasticsearch.helpers import bulk
-from elasticsearch import ConnectionError
-
 
 
 class Upload_batch:
