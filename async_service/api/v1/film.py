@@ -2,7 +2,8 @@ from http import HTTPStatus
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.film import GenreFilmWork, PersonFilmWork
+from models.film import PersonGenreFilm
+from models.genre import Genre
 from pydantic import BaseModel
 from pydantic.validators import UUID
 from services.film import FilmService, get_film_service
@@ -18,10 +19,10 @@ class FilmList(BaseModel):
 
 class FilmDetail(FilmList):
     description: Optional[str]
-    genres: Optional[List[GenreFilmWork]]
-    actors: Optional[List[PersonFilmWork]]
-    writers: Optional[List[PersonFilmWork]]
-    directors: Optional[List[PersonFilmWork]]
+    genres: Optional[List[Genre]]
+    actors: Optional[List[PersonGenreFilm]]
+    writers: Optional[List[PersonGenreFilm]]
+    directors: Optional[List[PersonGenreFilm]]
 
 
 @router.get("/search", response_model=List[FilmList])
