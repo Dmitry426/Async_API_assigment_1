@@ -2,7 +2,6 @@
   "film_work_pg": {
     "state_file_path": "./state/state.json",
     "limit": 1000,
-    "elastic_port": "http://localhost:9200",
     "film_work_state_field": "film_work_updated_at",
     "genres_state_field": "genres_updated_at",
     "persons_state_field": "persons_updated_at",

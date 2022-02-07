@@ -8,9 +8,9 @@ from elasticsearch.helpers import bulk
 
 
 class Upload_batch:
-    def __init__(self, config):
-        self.config = config
-        self.es = Elasticsearch(self.config.elastic_port)
+    def __init__(self, es_dsn):
+        self.es_dsn = es_dsn
+        self.es = Elasticsearch(hosts=[{"host": self.es_dsn.host, "port": self.es_dsn.port}])
         self.logger = logging.getLogger("migrate_etl")
         self.request_body = None
 

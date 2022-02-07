@@ -1,11 +1,14 @@
 import logging
 
+from dotenv import load_dotenv
 from psycopg2 import DatabaseError, OperationalError
 
 from etl_uploader import Upload_batch
 from postgres_loader import Load_data
 from state_operator import State_operator
 from transform_data import Data_Merger
+
+load_dotenv()
 
 
 class MainProcess:
@@ -24,17 +27,16 @@ class MainProcess:
         self.sql_query_film_work_by_id = self.config.sql_query_film_work_by_id
 
     def _es_upload_butch(self, data: dict):
-        es = Upload_batch(config=self.config)
+        es = Upload_batch(es_dsn=self.config.es_dsn())
         es.es_push_butch(data=data)
 
     def _film_work_process(self, cursor, film_work_query, state_field_name):
         for loaded in iter(
-            lambda: self.loader_process.postgres_producer(
-                cursor=cursor, query=film_work_query, state_field_name=state_field_name
-            ),
-            [],
+                lambda: self.loader_process.postgres_producer(
+                    cursor=cursor, query=film_work_query, state_field_name=state_field_name
+                ),
+                [],
         ):
-            print(loaded)
             parsed_data = self.transform_data.handle_merge_cases(query_data=loaded)
             self._es_upload_butch(data=parsed_data)
             self.state.validate_save_timestamp(
@@ -42,19 +44,19 @@ class MainProcess:
             )
 
     def _person_or_genre_process(
-        self,
-        cursor,
-        person_or_genre_query: str,
-        person_genre_fw_query: str,
-        state_field_name: str,
+            self,
+            cursor,
+            person_or_genre_query: str,
+            person_genre_fw_query: str,
+            state_field_name: str,
     ):
         for loaded in iter(
-            lambda: self.loader_process.postgres_producer(
-                cursor=cursor,
-                query=person_or_genre_query,
-                state_field_name=state_field_name,
-            ),
-            [],
+                lambda: self.loader_process.postgres_producer(
+                    cursor=cursor,
+                    query=person_or_genre_query,
+                    state_field_name=state_field_name,
+                ),
+                [],
         ):
             person_ids = (res["id"] for res in loaded)
             fw_ids = self.loader_process.postgres_enricher(
@@ -101,10 +103,10 @@ class PersonGenreProcess(MainProcess):
         super().__init__(config, postgres_connection)
 
     def migrate_genre_person(
-        self,
-        person_or_genre_query: str,
-        person_genre_fw_query: str,
-        state_filed_name: str,
+            self,
+            person_or_genre_query: str,
+            person_genre_fw_query: str,
+            state_filed_name: str,
     ):
         try:
             with self.conn_postgres.cursor() as cursor:

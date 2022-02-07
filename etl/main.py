@@ -9,7 +9,9 @@ from psycopg2 import OperationalError
 from psycopg2.extras import DictCursor
 
 from migration_process import FilmWorkProcess, PersonGenreProcess
-from validation_classes import Config, DSNSettings
+from validation_classes import Config
+
+load_dotenv()
 
 config = Config.parse_file("config.json")
 fw_config = config.film_work_pg
@@ -22,9 +24,6 @@ film_work_state_field = fw_config.film_work_state_field
 genres_state_field = fw_config.genres_state_field
 persons_state_field = fw_config.persons_state_field
 
-load_dotenv()
-dsl = DSNSettings().dict()
-
 
 def load_loger():
     logging.basicConfig(
@@ -34,7 +33,7 @@ def load_loger():
 
 @backoff.on_exception(backoff.expo, OperationalError, max_time=60)
 def migrate_to_etl():
-    with psycopg2.connect(**dsl, cursor_factory=DictCursor) as connection:
+    with psycopg2.connect(**fw_config.dsn().dict(), cursor_factory=DictCursor) as connection:
         film_work_to_es = FilmWorkProcess(
             config=fw_config, postgres_connection=connection
         )
@@ -61,6 +60,7 @@ def migrate_to_etl():
 if __name__ == "__main__":
     load_loger()
     try:
+        migrate_to_etl()
         schedule.every(1).minutes.do(migrate_to_etl)
         while True:
             schedule.run_pending()

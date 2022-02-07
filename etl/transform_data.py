@@ -11,7 +11,7 @@ class Data_Merger:
             "title": "",
             "description": "",
             "director": [],
-            "directors":  [],
+            "directors": [],
             "actors_names": [],
             "writers_names": [],
             "writers": [],
@@ -51,12 +51,12 @@ class Data_Merger:
         if obj["genre"] not in self.desired_structure["genre"]:
             self.desired_structure["genre"].append(obj["genre"]),
             self.desired_structure["genres"].append(
-                {"id": obj["genre_id"], "genre": obj["genre"]}
+                {"id": obj["genre_id"], "name": obj["genre"]}
             )
 
         if (
-            obj["role"] == "director"
-            and obj["full_name"] not in self.desired_structure["director"]
+                obj["role"] == "director"
+                and obj["full_name"] not in self.desired_structure["director"]
         ):
             self.desired_structure["director"].append(obj["full_name"])
             self.desired_structure["directors"].append(
@@ -64,16 +64,16 @@ class Data_Merger:
             )
 
         if (
-            obj["role"] == "actor"
-            and obj["full_name"] not in self.desired_structure["actors_names"]
+                obj["role"] == "actor"
+                and obj["full_name"] not in self.desired_structure["actors_names"]
         ):
             self.desired_structure["actors_names"].append(obj["full_name"]),
             self.desired_structure["actors"].append(
                 {"id": obj["person_id"], "name": obj["full_name"]}
             )
         if (
-            obj["role"] == "writer"
-            and obj["full_name"] not in self.desired_structure["writers_names"]
+                obj["role"] == "writer"
+                and obj["full_name"] not in self.desired_structure["writers_names"]
         ):
             self.desired_structure["writers_names"].append(obj["full_name"]),
             self.desired_structure["writers"].append(
