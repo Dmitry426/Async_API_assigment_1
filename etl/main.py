@@ -9,9 +9,7 @@ from psycopg2.extras import DictCursor
 
 from config_validation.config import Config
 from etl.config_validation.db_settings import DSNSettings, ESSettings
-from etl.migration.film_work_process import FilmWorkProcess
 from etl.migration.genre_process import GenreProcess
-from etl.migration.person_genre_process import PersonGenreProcess
 from etl.migration.person_process import PersonProcess
 from logger import logger
 
