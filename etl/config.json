@@ -34,7 +34,7 @@
         "state_field": "g.updated_at"
       }
     ],
-    "enricher_query": "SELECT DISTINCT p.id, p.full_name, p.updated_at, array_agg(DISTINCT pfw.role) AS role, array_agg(DISTINCT jsonb_build_object('id', fw.id, 'name', fw.title, 'imdb_rating', fw.rating)) AS film_works FROM content.person AS p LEFT JOIN content.person_film_work pfw on p.id = pfw.person_id LEFT JOIN content.film_work fw on fw.id = pfw.film_work_id WHERE p.id IN {ids} GROUP BY p.id"
+    "enricher_query": "SELECT DISTINCT p.id, p.full_name, p.updated_at, array_agg(DISTINCT pfw.role) AS role, array_agg(DISTINCT fw.id::text) AS film_works FROM content.person AS p LEFT JOIN content.person_film_work pfw on p.id = pfw.person_id LEFT JOIN content.film_work fw on fw.id = pfw.film_work_id WHERE p.id IN {ids} GROUP BY p.id"
   },
   "genre_pg": {
     "state_file_path": "./genre_state.json",

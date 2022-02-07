@@ -58,19 +58,8 @@
         "analyzer": "ru_en"
       },
       "film_works": {
-        "type": "nested",
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "imdb_rating": {
-            "type": "float"
-          },
-          "name": {
-            "type": "text",
-            "analyzer": "ru_en"
-          }
-        }
+        "type": "text",
+        "analyzer": "ru_en"
       }
     }
   }

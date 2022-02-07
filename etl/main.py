@@ -7,14 +7,13 @@ from dotenv import load_dotenv
 from psycopg2 import OperationalError
 from psycopg2.extras import DictCursor
 
-from etl.config_validation.db_settings import DSNSettings, ESSettings
-from etl.migration.genre_process import GenreProcess
-from etl.migration.person_process import PersonProcess
-from etl.migration.pg_load.film_work_load_data import FilmWorkLoadData
-from logger import logger
-from migration.film_work_process import FilmWorkProcess
-from migration.person_genre_process import PersonGenreProcess
 from config_validation.config import Config
+from etl.config_validation.db_settings import DSNSettings, ESSettings
+from etl.migration.film_work_process import FilmWorkProcess
+from etl.migration.genre_process import GenreProcess
+from etl.migration.person_genre_process import PersonGenreProcess
+from etl.migration.person_process import PersonProcess
+from logger import logger
 
 config = Config.parse_file("config.json")
 fw_config = config.film_work_pg
@@ -43,11 +42,7 @@ def migrate_to_etl():
             es_index_name='persons'
         )
 
-        person_to_es.migrate(
-            producer_data=config.person_pg.producer_queries,
-            order_field=config.person_pg.order_field,
-            state_field=config.person_pg.state_field
-        )
+        person_to_es.migrate()
 
         genre_to_es = GenreProcess(
             config=config.genre_pg,
@@ -56,42 +51,38 @@ def migrate_to_etl():
             es_index_name='genres'
         )
 
-        genre_to_es.migrate(
-            producer_data=config.genre_pg.producer_queries,
-            order_field=config.genre_pg.order_field,
-            state_field=config.genre_pg.state_field
-        )
+        genre_to_es.migrate()
 
-        film_work_to_es = FilmWorkProcess(
-            config=fw_config,
-            postgres_connection=connection,
-            es_settings=es_settings,
-            es_index_name='movies'
-        )
-
-        film_work_to_es.migrate(
-            film_work_query=sql_query_film_work,
-            state_filed_name=film_work_state_field
-        )
-
-        genres_persons_to_es = PersonGenreProcess(
-            config=fw_config,
-            postgres_connection=connection,
-            es_settings=es_settings,
-            es_index_name='movies'
-        )
-
-        genres_persons_to_es.migrate(
-            person_or_genre_query=sql_query_genres,
-            person_genre_fw_query=sql_query_genre_film_work,
-            state_filed_name=genres_state_field,
-        )
-
-        genres_persons_to_es.migrate(
-            person_or_genre_query=sql_query_persons,
-            person_genre_fw_query=sql_query_person_film_work,
-            state_filed_name=persons_state_field
-        )
+        # film_work_to_es = FilmWorkProcess(
+        #     config=fw_config,
+        #     postgres_connection=connection,
+        #     es_settings=es_settings,
+        #     es_index_name='movies'
+        # )
+        #
+        # film_work_to_es.migrate(
+        #     film_work_query=sql_query_film_work,
+        #     state_filed_name=film_work_state_field
+        # )
+        #
+        # genres_persons_to_es = PersonGenreProcess(
+        #     config=fw_config,
+        #     postgres_connection=connection,
+        #     es_settings=es_settings,
+        #     es_index_name='movies'
+        # )
+        #
+        # genres_persons_to_es.migrate(
+        #     person_or_genre_query=sql_query_genres,
+        #     person_genre_fw_query=sql_query_genre_film_work,
+        #     state_filed_name=genres_state_field,
+        # )
+        #
+        # genres_persons_to_es.migrate(
+        #     person_or_genre_query=sql_query_persons,
+        #     person_genre_fw_query=sql_query_person_film_work,
+        #     state_filed_name=persons_state_field
+        # )
 
 
 if __name__ == "__main__":

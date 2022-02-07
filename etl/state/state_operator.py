@@ -31,3 +31,4 @@ class StateOperator(State, JsonFileStorage):
         self.state.set_state(
             key=state_field_name, value=str(parsed_time[state_field_name])
         )
+        print(self.state)
