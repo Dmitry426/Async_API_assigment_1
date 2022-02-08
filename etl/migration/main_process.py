@@ -1,46 +1,13 @@
-import abc
+import re
 from datetime import datetime
+from typing import Iterable
 
 from psycopg2 import DatabaseError, OperationalError
 
 from etl.logger import logger
-from etl.migration.data_merge.film_work_data_merger import FilmWorkDataMerger
 from etl.migration.es_upload.upload_batch import UploadBatch
-from etl.migration.pg_load.film_work_load_data import FilmWorkLoadData
 from etl.state.state import State
-from etl.state.state_operator import StateOperator
 from etl.state.storages.json_file_storage import JsonFileStorage
-
-
-class MainProcess:
-    """
-    Main migration process is not supposed to be initialized ,
-    created in order to be inherited by specific  migration class like FilmWorkProcess
-    """
-
-    def __init__(self,
-                 config,
-                 postgres_connection,
-                 es_settings: dict,
-                 es_index_name: str
-                 ):
-        self.config = config
-        self.conn_postgres = postgres_connection
-        self.state = StateOperator(self.config)
-
-        self.es_settings = es_settings
-        self.es_index_name = es_index_name
-
-        self.loader_process = FilmWorkLoadData(config=self.config)
-        self.transform_data = FilmWorkDataMerger()
-
-    @abc.abstractmethod
-    def migrate(self, *args, **kwargs):
-        pass
-
-    def _es_upload_batch(self, data: list):
-        es = UploadBatch(es_dsl=self.es_settings, index_name=self.es_index_name)
-        es.es_push_batch(data=data)
 
 
 class UnifiedProcess:
@@ -63,9 +30,11 @@ class UnifiedProcess:
         try:
             producer_data = self.config.producer_queries
             updated_ids = self.__get_updated_item_ids(producer_data)
-            rich_data = self.enrich_data(updated_ids)
-            ready_data = self.transform(rich_data)
-            self._es_upload_batch(ready_data)
+
+            for rich_data in self.enrich_data(updated_ids):
+                ready_data = self.transform(rich_data)
+                self._es_upload_batch(ready_data)
+
             self.state.storage.save_state(self._local_state)
 
         except (OperationalError, DatabaseError) as e:
@@ -73,14 +42,28 @@ class UnifiedProcess:
         except Exception as e:
             logger.exception(e)
 
-    def enrich_data(self, person_ids):
-        with self.conn_postgres.cursor() as cursor:
-            query = self.config.enricher_query.format(ids=tuple(person_ids))
-            cursor.execute(cursor.mogrify(query))
-            enriched_data = cursor.fetchall()
-            return enriched_data
+    @staticmethod
+    def __get_offset(step, start=0):
+        count = start
+        while True:
+            yield count
+            count += step
 
-    def transform(self, items):
+    def enrich_data(self, item_ids: Iterable) -> dict:
+        with self.conn_postgres.cursor() as cursor:
+            query = self.config.enricher_query.format(ids=tuple(item_ids))
+
+            for offset in self.__get_offset(self.config.limit):
+                limited_query = f'{query} LIMIT {self.config.limit} OFFSET {offset}'
+                cursor.execute(cursor.mogrify(limited_query))
+
+                enriched_data = cursor.fetchall()
+                if enriched_data:
+                    yield enriched_data
+                else:
+                    return
+
+    def transform(self, items: Iterable) -> Iterable:
         """
         Transformation and Validation
         """
@@ -112,6 +95,6 @@ class UnifiedProcess:
                 self._local_state[f'{data.table}s_updated_at'] = str(latest_date)
             return items
 
-    def _es_upload_batch(self, data: list):
+    def _es_upload_batch(self, data: Iterable):
         es = UploadBatch(es_dsl=self.es_settings, index_name=self.es_index_name)
         es.es_push_batch(data=data)

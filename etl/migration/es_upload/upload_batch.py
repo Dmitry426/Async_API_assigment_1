@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Iterable
 
 import backoff
 from elasticsearch import (
@@ -37,7 +38,7 @@ class UploadBatch:
             except ElasticsearchException as es1:
                 logger.exception(es1)
 
-    def _generate_data(self, data: list):
+    def _generate_data(self, data: Iterable):
         for item in data:
             yield {
                 "_index": self.current_index,
@@ -46,7 +47,7 @@ class UploadBatch:
             }
 
     @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
-    def es_push_batch(self, data: list):
+    def es_push_batch(self, data: Iterable):
         self._push_index()
         try:
             bulk(self.es, self._generate_data(data=data))

@@ -69,6 +69,6 @@
         "state_field": "updated_at"
       }
     ],
-    "enricher_query": "SELECT g.id, g.name, g.updated_at, array_agg(DISTINCT jsonb_build_array('id', fw.id, 'title', fw.title, 'imdb_rating', fw.rating, 'genre', jsonb_build_array('id', fg.id, 'title', fg.name))) AS film_works FROM content.genre AS g LEFT JOIN content.genre_film_work gfw on g.id = gfw.genre_id LEFT JOIN content.film_work fw on fw.id = gfw.film_work_id LEFT JOIN content.genre_film_work w on fw.id = w.film_work_id LEFT JOIN content.genre fg on w.genre_id = fg.id WHERE g.id IN {ids} GROUP BY g.id;"
+    "enricher_query": "SELECT g.id, g.name, g.updated_at, array_agg(DISTINCT jsonb_build_array('id', fw.id, 'title', fw.title, 'imdb_rating', fw.rating, 'genre', jsonb_build_array('id', fg.id, 'title', fg.name))) AS film_works FROM content.genre AS g LEFT JOIN content.genre_film_work gfw on g.id = gfw.genre_id LEFT JOIN content.film_work fw on fw.id = gfw.film_work_id LEFT JOIN content.genre_film_work w on fw.id = w.film_work_id LEFT JOIN content.genre fg on w.genre_id = fg.id WHERE g.id IN {ids} GROUP BY g.id"
   }
 }

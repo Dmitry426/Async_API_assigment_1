@@ -1,8 +1,5 @@
-from typing import Optional, List
-
 from pydantic.env_settings import BaseSettings
 from pydantic.fields import Field
-from pydantic.main import BaseModel
 
 
 class DSNSettings(BaseSettings):
