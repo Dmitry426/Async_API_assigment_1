@@ -10,7 +10,6 @@ class State:
     def set_state(self, key: str, value: Any) -> None:
         load = self.storage.retrieve_state()
         load[key] = value
-        # self.storage.save_state(load)
 
     def get_state(self, key: str) -> Any:
         result = self.storage.retrieve_state()

@@ -1,6 +1,5 @@
 from etl.state.storages.json_file_storage import JsonFileStorage
 from .state import State
-from ..logger import logger
 from ..config_validation.utils import DatetimeSerialization
 
 
@@ -11,7 +10,6 @@ class StateOperator(State, JsonFileStorage):
     """
 
     def __init__(self, config):
-        logger.debug('StateOperator.init()')
         super().__init__(config)
         json_storage = JsonFileStorage(file_path=config.state_file_path)
         self.state = State(json_storage)
@@ -31,4 +29,3 @@ class StateOperator(State, JsonFileStorage):
         self.state.set_state(
             key=state_field_name, value=str(parsed_time[state_field_name])
         )
-        print(self.state)
