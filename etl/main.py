@@ -38,7 +38,6 @@ def migrate_to_etl():
             es_settings=es_settings,
             es_index_name='persons'
         )
-
         person_to_es.migrate()
 
         genre_to_es = GenreProcess(
@@ -47,7 +46,6 @@ def migrate_to_etl():
             es_settings=es_settings,
             es_index_name='genres'
         )
-
         genre_to_es.migrate()
 
 
