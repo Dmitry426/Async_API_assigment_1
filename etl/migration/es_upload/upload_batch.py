@@ -15,7 +15,10 @@ from etl.logger import logger
 
 class UploadBatch:
     def __init__(self, es_dsl, index_name):
-        connection_url = es_dsl.get('connection_url', 'http://localhost:9200')
+        es_host = es_dsl.get('host', 'localhost')
+        es_port = es_dsl.get('port', '9200')
+        connection_url = f'http://{es_host}:{es_port}'
+
         self.es = Elasticsearch(connection_url)
         self.current_index = index_name
 
