@@ -1,15 +1,17 @@
-from db import elastic, redis
-from core.logger import LOGGING
-from core import config
-from api.api_v1 import film
 import logging
 import os
+
 import aioredis
 import uvicorn
+from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from dotenv import load_dotenv
+
+from api.v1 import film
+from core import config
+from core.logger import LOGGING
+from db import elastic, redis
 
 load_dotenv()
 
@@ -37,7 +39,7 @@ async def shutdown():
     await elastic.es.close()
 
 
-app.include_router(film.router, prefix="/api/api_v1/film", tags=["film"])
+app.include_router(film.router, prefix="/api/v1/film", tags=["film"])
 
 if __name__ == "__main__":
     uvicorn.run(

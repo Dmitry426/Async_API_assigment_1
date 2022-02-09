@@ -15,6 +15,6 @@ $ docker-compose up -d  --bulid
 ```
 
 # Notes 
-- Python:slim imagein docker  course uvicorn using specific dependencies
-- In order to run Alpine version all orjson dependecies must be in reqirements.txt 
+- Python:slim image in docker  course uvicorn using specific dependencies
+- In order to run Alpine version all orjson dependencies must be in requirements.txt 
 - Uvicorn is run from main.py in order to use custom logger  .
