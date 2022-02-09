@@ -30,15 +30,11 @@ __pycache__/
 *.egg-info/
 data_es/*
 data/*
-.env
 env?
-.idea
 .tox
 .vscode/
 rel
 wheels
-packages
-__pycache__/
 etl_index/
 data_postgres
 data_es
