@@ -21,7 +21,7 @@ services:
   postgres:
     image: postgres:13.0-alpine
     volumes:
-      - ./data_postgres:/var/lib/postgresql/data/
+      - data_postgres:/var/lib/postgresql/data/
     env_file:
       - ./.env
     environment:
@@ -39,12 +39,14 @@ services:
       - node.name=es01
       - discovery.type=single-node
     volumes:
-      - ./data_es:/usr/share/elasticsearch/data
+      - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
 
   redis_server:
     image: 'redis:alpine'
+    volumes:
+      - data_redis:/data
     env_file:
       - ./.env
     ports:
@@ -60,3 +62,8 @@ services:
       - async_server
     ports:
       - "80:80"
+
+volumes:
+  data_es:
+  data_postgres:
+  data_redis:
