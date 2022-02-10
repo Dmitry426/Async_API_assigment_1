@@ -67,3 +67,4 @@ volumes:
   data_es:
   data_postgres:
   data_redis:
+
