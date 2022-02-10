@@ -12,7 +12,7 @@ class PersonFilmWork(BaseModel):
 
 class GenreFilmWork(BaseModel):
     id: UUID
-    genre: str
+    name: str
 
 
 class FilmWork(BaseModel):

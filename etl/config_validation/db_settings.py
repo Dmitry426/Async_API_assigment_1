@@ -15,7 +15,8 @@ class DSNSettings(BaseSettings):
 
 
 class ESSettings(BaseSettings):
-    connection_url: str = Field(..., env="ES_CONNECTION")
+    host: str = Field(..., env="ELASTIC_HOST")
+    port: str = Field(..., env="ELASTIC_PORT")
 
     class Config:
         env_file = ".env"

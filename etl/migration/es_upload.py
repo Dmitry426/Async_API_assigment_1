@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Iterable
 
@@ -10,19 +11,22 @@ from elasticsearch import (
 )
 from elasticsearch.helpers import bulk
 
-from etl.logger import logger
+logger = logging.getLogger(__name__)
 
 
 class UploadBatch:
     def __init__(self, es_dsl, index_name):
-        connection_url = es_dsl.get('connection_url', 'http://localhost:9200')
+        es_host = es_dsl.get('host', 'localhost')
+        es_port = es_dsl.get('port', '9200')
+        connection_url = f'http://{es_host}:{es_port}'
+
         self.es = Elasticsearch(connection_url)
         self.current_index = index_name
 
         self.request_body = None
 
     def _create_index(self):
-        current_path = Path('./migration/es_upload').absolute()
+        current_path = Path().absolute()
         try:
             with open(current_path / f'index_schemas/{self.current_index}.json') as json_file:
                 self.request_body = json.load(json_file)
