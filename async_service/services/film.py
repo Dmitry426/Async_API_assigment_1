@@ -8,10 +8,7 @@ from elasticsearch_dsl import Q, Search
 from fastapi import Depends
 from models.film import Film
 from pydantic.validators import UUID
-
 from services.cache import RedisBackend, get_redis_backend_service
-
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
 
 class FilmService:

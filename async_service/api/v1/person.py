@@ -2,10 +2,10 @@ from http import HTTPStatus
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-
 from pydantic import BaseModel
 from pydantic.validators import UUID
 from services.person import PersonService, get_person_service
+
 from .film import FilmList
 
 router = APIRouter()

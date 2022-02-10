@@ -27,8 +27,9 @@ class FilmDetail(FilmList):
 
 @router.get("/search", response_model=List[FilmList])
 async def film_search(
-    query: str, film_service: FilmService = Depends(get_film_service), page_size: int = Query(50, alias="page[size]"),
-    page_number: int = Query(1, alias="page[number]")
+        query: str, film_service: FilmService = Depends(get_film_service),
+        page_size: int = Query(50, alias="page[size]"),
+        page_number: int = Query(1, alias="page[number]")
 ) -> List[FilmList]:
     films = await film_service.get_list(page_size=page_size, page_number=page_number, query=query)
     return films
@@ -36,7 +37,7 @@ async def film_search(
 
 @router.get("/{film_id}", response_model=FilmDetail)
 async def film_details(
-    film_id: UUID, film_service: FilmService = Depends(get_film_service)
+        film_id: UUID, film_service: FilmService = Depends(get_film_service)
 ) -> FilmDetail:
     film = await film_service.get_by_id(film_id)
     if not film:
@@ -51,6 +52,6 @@ async def film_list(
         sort: str = Query("-imdb_rating"), page_size: int = Query(50, alias="page[size]"),
         page_number: int = Query(1, alias="page[number]"),
         filter_genre: Optional[UUID] = Query(None, alias="filter[genre]")
-        ) -> List[FilmList]:
+) -> List[FilmList]:
     films = await film_service.get_list(page_size=page_size, page_number=page_number, sort=sort, genre_id=filter_genre)
     return films
