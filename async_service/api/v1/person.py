@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from pydantic.validators import UUID
 from services.person import PersonService, get_person_service
+from film import FilmList
 
 router = APIRouter()
 
@@ -15,12 +16,6 @@ class Person(BaseModel):
     full_name: str
     role: List[str]
     film_works: List[UUID]
-
-
-class FilmList(BaseModel):
-    id: UUID
-    title: str
-    imdb_rating: Optional[float]
 
 
 @router.get("/search", response_model=List[Person])
@@ -47,7 +42,7 @@ async def person_details(
 
 
 @router.get("/{person_id}/film/", response_model=List[FilmList])
-async def film_list(
+async def person_list(
         film_service: PersonService = Depends(get_person_service),
         page_size: int = Query(50, alias="page[size]"),
         page_number: int = Query(1, alias="page[number]"),
