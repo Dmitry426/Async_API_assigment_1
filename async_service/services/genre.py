@@ -9,7 +9,6 @@ from elasticsearch_dsl import Search
 from fastapi import Depends
 from models.genre import Genre
 from pydantic.validators import UUID
-
 from services.cache import RedisBackend, get_redis_backend_service
 
 
