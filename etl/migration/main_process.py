@@ -4,9 +4,8 @@ from typing import Iterable, List
 
 from psycopg2 import DatabaseError, OperationalError
 
-from .es_upload.upload_batch import UploadBatch
-from .state.state import State
-from .state.storages.json_file_storage import JsonFileStorage
+from .es_upload import UploadBatch
+from .state import State, JsonFileStorage
 
 logger = getLogger(__name__)
 

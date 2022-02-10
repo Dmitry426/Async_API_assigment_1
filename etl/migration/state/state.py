@@ -1,6 +1,6 @@
 from typing import Any
 
-from .storages.base_storage import BaseStorage
+from .storages import BaseStorage
 
 
 class State:

@@ -26,7 +26,7 @@ class UploadBatch:
         self.request_body = None
 
     def _create_index(self):
-        current_path = Path('./migration/es_upload').absolute()
+        current_path = Path().absolute()
         try:
             with open(current_path / f'index_schemas/{self.current_index}.json') as json_file:
                 self.request_body = json.load(json_file)

@@ -11,10 +11,9 @@ from config_validation.config import Config
 from config_validation.db_settings import DSNSettings, ESSettings
 from config_validation.indexes import FilmWork, Genre, Person
 from logger import logger
-from migration.main_process import UnifiedProcess
+from migration import UnifiedProcess
 
 config = Config.parse_file("config.json")
-
 
 load_dotenv()
 dsl = DSNSettings().dict()
