@@ -12,8 +12,8 @@ def orjson_dumps(v, *, default):
 class Person(BaseModel):
     id: UUID
     full_name: str
-    role: str
-    film_ids: List[UUID]
+    role: List[str]
+    film_works: List[UUID]
 
     class Config:
         json_loads = orjson.loads
