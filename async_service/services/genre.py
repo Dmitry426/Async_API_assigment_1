@@ -46,7 +46,7 @@ class GenreService:
 
         return result
 
-    async def _get_genre_from_elastic(self, genre_id: str) -> Optional[Genre]:
+    async def _get_genre_from_elastic(self, genre_id: UUID) -> Optional[Genre]:
         doc = await self.elastic.get("genres", genre_id)
         return Genre(**doc["_source"])
 

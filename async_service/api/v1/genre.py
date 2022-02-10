@@ -3,6 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from models.genre import Genre
+from pydantic.validators import UUID
 from services.genre import GenreService, get_genre_service
 
 router = APIRouter()
@@ -10,7 +11,7 @@ router = APIRouter()
 
 @router.get("/{genre_id}", response_model=Genre)
 async def genre_details(
-        genre_id: str, genre_service: GenreService = Depends(get_genre_service)
+        genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
 ) -> Genre:
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
