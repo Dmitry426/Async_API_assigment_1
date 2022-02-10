@@ -11,8 +11,6 @@ from pydantic.validators import UUID
 
 from services.cache import RedisBackend, get_redis_backend_service
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
-
 
 class FilmService:
     def __init__(self, redis: RedisBackend, elastic: AsyncElasticsearch):
