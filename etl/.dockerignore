@@ -1,9 +1,0 @@
-.git
-Dockerfile
-.DS_Store
-.gitignore
-README.md
-venv
-.idea
-__pycache__/
-.env

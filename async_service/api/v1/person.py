@@ -2,12 +2,19 @@ from http import HTTPStatus
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.person import Person
+
 from pydantic import BaseModel
 from pydantic.validators import UUID
 from services.person import PersonService, get_person_service
 
 router = APIRouter()
+
+
+class Person(BaseModel):
+    id: UUID
+    full_name: str
+    role: List[str]
+    film_works: List[UUID]
 
 
 class FilmList(BaseModel):
@@ -23,6 +30,8 @@ async def person_search(
         page_number: int = Query(1, alias="page[number]")
 ) -> List[Person]:
     persons = await person_service.get_list(page_size=page_size, page_number=page_number, query=query)
+    if not persons:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="The is no such person ")
     return persons
 
 
@@ -44,5 +53,5 @@ async def film_list(
         page_number: int = Query(1, alias="page[number]"),
         person_id: Optional[UUID] = Query(None, alias="filter[genre]")
 ) -> List[Person]:
-    films = await film_service.get_films_by_person(page_size=page_size, page_number=page_number, perosn_id=person_id)
+    films = await film_service.get_films_by_person(page_size=page_size, page_number=page_number, person_id=person_id)
     return films
