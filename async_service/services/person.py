@@ -42,11 +42,10 @@ class PersonService:
 
         search = Search(using=self.elastic)
         if query:
-            search = search.query(Q("match", title={"query": query, "fuzziness": "auto"}))
+            search = search.query(Q("multi_match", query=query, fields=['full_name', 'role'], fuzziness='auto'))
 
         start = (page_number - 1) * page_size
         end = start + page_size
-
         search = search[start:end]
         body = search.to_dict()
         result = await self.elastic.search(index="persons", body=body)
@@ -57,15 +56,14 @@ class PersonService:
                                   person_id: UUID
                                   ) -> List[Film]:
         search = Search(using=self.elastic)
-        search = Q("bool",
-                   should=[
-                       Q("nested", path="directors", query=Q("term", directors__id=person_id)),
-                       Q("nested", path="actors", query=Q("term", actors__id=person_id)),
-                       Q("nested", path="writers", query=Q("term", writers__id=person_id)),
-                   ])
+        search = search.query(Q("bool",
+                                should=[
+                                    Q("nested", path="directors", query=Q("term", directors__id=person_id)),
+                                    Q("nested", path="actors", query=Q("term", actors__id=person_id)),
+                                    Q("nested", path="writers", query=Q("term", writers__id=person_id)),
+                                ]))
         start = (page_number - 1) * page_size
         end = start + page_size
-
         search = search[start:end]
         body = search.to_dict()
         result = await self.elastic.search(index="movies", body=body)
