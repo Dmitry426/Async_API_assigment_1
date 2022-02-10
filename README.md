@@ -1,6 +1,6 @@
 ## FastAPI project async .
 
-- As for now project can't be run from the container,
+- As for now project can run from the container,
 
 ## Minimum Requirements
 This project supports Ubuntu Linux 18.04  It is not tested or supported for the Windows OS.
