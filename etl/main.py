@@ -8,17 +8,29 @@ from psycopg2 import OperationalError
 from psycopg2.extras import DictCursor
 
 from config_validation.config import Config
-from etl.config_validation.db_settings import DSNSettings, ESSettings
-from etl.migration.film_work_process import FilmWorkProcess
-from etl.migration.genre_process import GenreProcess
-from etl.migration.person_process import PersonProcess
+from config_validation.db_settings import DSNSettings, ESSettings
+from config_validation.indexes import FilmWork, Genre, Person
 from logger import logger
+from migration.main_process import UnifiedProcess
 
 config = Config.parse_file("config.json")
+
 
 load_dotenv()
 dsl = DSNSettings().dict()
 es_settings = ESSettings().dict()
+
+
+class FilmWorkProcess(UnifiedProcess):
+    validation_model = FilmWork
+
+
+class PersonProcess(UnifiedProcess):
+    validation_model = Person
+
+
+class GenreProcess(UnifiedProcess):
+    validation_model = Genre
 
 
 @backoff.on_exception(backoff.expo, OperationalError, max_time=60)

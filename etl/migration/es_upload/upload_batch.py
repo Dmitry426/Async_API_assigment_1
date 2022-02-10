@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Iterable
 
@@ -10,7 +11,7 @@ from elasticsearch import (
 )
 from elasticsearch.helpers import bulk
 
-from etl.logger import logger
+logger = logging.getLogger(__name__)
 
 
 class UploadBatch:

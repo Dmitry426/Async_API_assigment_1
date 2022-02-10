@@ -1,13 +1,14 @@
-import re
 from datetime import datetime
-from typing import Iterable
+from logging import getLogger
+from typing import Iterable, List
 
 from psycopg2 import DatabaseError, OperationalError
 
-from etl.logger import logger
-from etl.migration.es_upload.upload_batch import UploadBatch
-from etl.state.state import State
-from etl.state.storages.json_file_storage import JsonFileStorage
+from .es_upload.upload_batch import UploadBatch
+from .state.state import State
+from .state.storages.json_file_storage import JsonFileStorage
+
+logger = getLogger(__name__)
 
 
 class UnifiedProcess:
@@ -19,6 +20,7 @@ class UnifiedProcess:
         self.conn_postgres = postgres_connection
         json_storage = JsonFileStorage(file_path=self.config.state_file_path)
         self.state = State(storage=json_storage)
+        self._local_state = self.state.storage.retrieve_state()
 
         self.es_settings = es_settings
         self.es_index_name = es_index_name
@@ -35,12 +37,13 @@ class UnifiedProcess:
                 ready_data = self.transform(rich_data)
                 self._es_upload_batch(ready_data)
 
-            self.state.storage.save_state(self._local_state)
-
         except (OperationalError, DatabaseError) as e:
             logger.exception(e)
         except Exception as e:
             logger.exception(e)
+
+        if self._local_state:
+            self.state.storage.save_state(self._local_state)
 
     @staticmethod
     def __get_offset(step, start=0):
@@ -50,12 +53,15 @@ class UnifiedProcess:
             count += step
 
     def enrich_data(self, item_ids: Iterable) -> dict:
+        if not item_ids:
+            return
+
         with self.conn_postgres.cursor() as cursor:
-            query = self.config.enricher_query.format(ids=tuple(item_ids))
+            query = self.config.enricher_query
 
             for offset in self.__get_offset(self.config.limit):
                 limited_query = f'{query} LIMIT {self.config.limit} OFFSET {offset}'
-                cursor.execute(cursor.mogrify(limited_query))
+                cursor.execute(limited_query, (tuple(item_ids),))
 
                 enriched_data = cursor.fetchall()
                 if enriched_data:
@@ -79,7 +85,7 @@ class UnifiedProcess:
         sql_query_params = f"""WHERE {query_data.state_field} > ('{latest_value}')"""
         return sql_query_params
 
-    def __get_updated_item_ids(self, producer_data):
+    def __get_updated_item_ids(self, producer_data: List) -> set:
         with self.conn_postgres.cursor() as cursor:
             items = set()
             for data in producer_data:
@@ -91,10 +97,12 @@ class UnifiedProcess:
                 query_data = cursor.fetchall()
                 items.update(item[0] for item in query_data)
 
-                latest_date = max(item[1] for item in query_data)
-                self._local_state[f'{data.table}s_updated_at'] = str(latest_date)
+                if query_data:
+                    latest_date = max(item[1] for item in query_data)
+                    updated_field_name = f'{data.table}_updated_at'
+                    self._local_state[updated_field_name] = str(latest_date)
             return items
 
-    def _es_upload_batch(self, data: Iterable):
+    def _es_upload_batch(self, data: Iterable) -> None:
         es = UploadBatch(es_dsl=self.es_settings, index_name=self.es_index_name)
         es.es_push_batch(data=data)
