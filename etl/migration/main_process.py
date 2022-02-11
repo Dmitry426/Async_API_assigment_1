@@ -2,8 +2,6 @@ from datetime import datetime
 from logging import getLogger
 from typing import Iterable, List
 
-from psycopg2 import DatabaseError, OperationalError
-
 from .es_upload import UploadBatch
 from .state import State, JsonFileStorage
 
@@ -36,16 +34,14 @@ class UnifiedProcess:
                 ready_data = self.transform(rich_data)
                 self._es_upload_batch(ready_data)
 
-        except (OperationalError, DatabaseError) as e:
-            logger.exception(e)
-        except Exception as e:
-            logger.exception(e)
+        except Exception:
+            logger.exception('Additional information about an error')
 
         if self._local_state:
             self.state.storage.save_state(self._local_state)
 
     @staticmethod
-    def __get_offset(step, start=0):
+    def _get_offset(step, start=0):
         count = start
         while True:
             yield count
@@ -58,7 +54,7 @@ class UnifiedProcess:
         with self.conn_postgres.cursor() as cursor:
             query = self.config.enricher_query
 
-            for offset in self.__get_offset(self.config.limit):
+            for offset in self._get_offset(self.config.limit):
                 limited_query = f'{query} LIMIT {self.config.limit} OFFSET {offset}'
                 cursor.execute(limited_query, (tuple(item_ids),))
 
