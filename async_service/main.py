@@ -3,17 +3,14 @@ import os
 
 import aioredis
 import uvicorn
+from api.v1 import film, genre, person
+from core import config
+from core.logger import LOGGING
+from db import elastic, redis
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-
-
-from api.v1 import film, person, genre
-
-from core import config
-from core.logger import LOGGING
-from db import elastic, redis
 
 load_dotenv()
 

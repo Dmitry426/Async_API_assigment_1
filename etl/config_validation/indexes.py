@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic.class_validators import validator
 from pydantic.main import BaseModel

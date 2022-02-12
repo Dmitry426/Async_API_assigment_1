@@ -3,7 +3,7 @@ from logging import getLogger
 from typing import Iterable, List
 
 from .es_upload import UploadBatch
-from .state import State, JsonFileStorage
+from .state import JsonFileStorage, State
 
 logger = getLogger(__name__)
 

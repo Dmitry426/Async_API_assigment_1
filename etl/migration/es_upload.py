@@ -4,10 +4,7 @@ from pathlib import Path
 from typing import Iterable
 
 import backoff
-from elasticsearch import (
-    Elasticsearch,
-    ElasticsearchException
-)
+from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch.helpers import bulk
 
 logger = logging.getLogger(__name__)

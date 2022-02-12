@@ -3,15 +3,14 @@ from time import sleep
 import backoff
 import psycopg2
 import schedule
-from dotenv import load_dotenv
-from psycopg2 import OperationalError
-from psycopg2.extras import DictCursor
-
 from config_validation.config import Config
 from config_validation.db_settings import DSNSettings, ESSettings
 from config_validation.indexes import FilmWork, Genre, Person
+from dotenv import load_dotenv
 from logger import logger
 from migration import UnifiedProcess
+from psycopg2 import OperationalError
+from psycopg2.extras import DictCursor
 
 config = Config.parse_file("config.json")
 
