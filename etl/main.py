@@ -66,5 +66,5 @@ if __name__ == "__main__":
         while True:
             schedule.run_pending()
             sleep(1)
-    except psycopg2.OperationalError as e:
-        logger.exception(e)
+    except psycopg2.OperationalError:
+        logger.exception('Additional information about an error')

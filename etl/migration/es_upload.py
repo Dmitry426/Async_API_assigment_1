@@ -5,7 +5,6 @@ from typing import Iterable
 
 import backoff
 from elasticsearch import (
-    ConnectionError,
     Elasticsearch,
     ElasticsearchException
 )
@@ -30,17 +29,14 @@ class UploadBatch:
         try:
             with open(current_path / f'index_schemas/{self.current_index}.json') as json_file:
                 self.request_body = json.load(json_file)
-        except FileNotFoundError as e:
-            logger.exception(e)
+        except FileNotFoundError:
+            logger.exception('Additional information about an error')
 
     def _push_index(self):
         """Method to keep index automatically updated"""
         if not self.es.indices.exists(index=self.current_index):
-            try:
-                self._create_index()
-                self.es.indices.create(index=self.current_index, body=self.request_body)
-            except ElasticsearchException as es1:
-                logger.exception(es1)
+            self._create_index()
+            self.es.indices.create(index=self.current_index, body=self.request_body)
 
     def _generate_data(self, data: Iterable):
         for item in data:
@@ -50,11 +46,8 @@ class UploadBatch:
                 "_source": item
             }
 
-    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    @backoff.on_exception(backoff.expo, ElasticsearchException, max_time=60)
     def es_push_batch(self, data: Iterable):
         self._push_index()
-        try:
-            bulk(self.es, self._generate_data(data=data))
-            self.es.transport.close()
-        except ElasticsearchException as es2:
-            logger.exception(es2)
+        bulk(self.es, self._generate_data(data=data))
+        self.es.transport.close()
