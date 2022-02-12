@@ -9,7 +9,10 @@ from services.genre import GenreService, get_genre_service
 router = APIRouter()
 
 
-@router.get("/{genre_id}", response_model=Genre)
+@router.get(
+    "/{genre_id}", response_model=Genre, name="Genre by ID",
+    description="Returns specific genre by its UUID."
+    )
 async def genre_details(
         genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
 ) -> Genre:
@@ -20,7 +23,10 @@ async def genre_details(
     return genre
 
 
-@router.get("/", response_model=List[Genre])
-async def film_list(genre_service: GenreService = Depends(get_genre_service)) -> List[Genre]:
+@router.get(
+    "/", response_model=List[Genre], name="Genre list",
+    description="Returns list with all genres in database"
+    )
+async def genre_list(genre_service: GenreService = Depends(get_genre_service)) -> List[Genre]:
     genres = await genre_service.get_list()
     return genres
