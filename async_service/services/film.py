@@ -23,10 +23,8 @@ class FilmService:
             try:
                 film = await self._get_film_from_elastic(film_id)
             except NotFoundError:
-                film = None
-
-            if not film:
                 return None
+
             await self.redis.put_obj_to_cache(film, str(film.id))
 
         return film

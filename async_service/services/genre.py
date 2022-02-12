@@ -24,10 +24,8 @@ class GenreService:
             try:
                 genre = await self._get_genre_from_elastic(genre_id)
             except NotFoundError:
-                genre = None
-
-            if not genre:
                 return None
+
             await self.redis.put_obj_to_cache(genre, str(genre.id))
 
         return genre
@@ -35,7 +33,7 @@ class GenreService:
     async def get_list(self) -> List[Genre]:
         result = await self.redis.obj_from_cache("all_genres", Genre)
         if not result:
-            search = Search(using=self.elastic).sort({"_name.raw": "asc"})
+            search = Search(using=self.elastic).sort({"name.raw": "asc"})
             body = search.to_dict()
             data = await self.elastic.search(index="genres", body=body)
             result = [Genre(**hit["_source"]) for hit in data["hits"]["hits"]]
