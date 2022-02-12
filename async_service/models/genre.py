@@ -1,16 +1,8 @@
-import orjson
-from pydantic import BaseModel
 from pydantic.validators import UUID
 
-
-def orjson_dumps(v, *, default):
-    return orjson.dumps(v, default=default).decode()
+from .film import JsonConfig
 
 
-class Genre(BaseModel):
+class Genre(JsonConfig):
     id: UUID
     name: str
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
