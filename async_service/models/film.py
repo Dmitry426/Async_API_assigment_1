@@ -9,12 +9,18 @@ def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
 
 
+class JsonConfig(BaseModel):
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
+
 class PersonGenreFilm(BaseModel):
     id: UUID
     name: str
 
 
-class Film(BaseModel):
+class Film(JsonConfig):
     id: UUID
     imdb_rating: float = None
     genres: Optional[List[PersonGenreFilm]]
@@ -25,7 +31,3 @@ class Film(BaseModel):
     writers_names: Optional[List[str]]
     actors: Optional[List[PersonGenreFilm]]
     writers: Optional[List[PersonGenreFilm]]
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps

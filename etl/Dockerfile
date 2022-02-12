@@ -1,4 +1,4 @@
-FROM python:3.9.6-alpine
+FROM python:3.10.2-alpine3.15
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -17,3 +17,4 @@ WORKDIR $APP_HOME
 COPY . .
 
 CMD ["python"  , "main.py"]
+
