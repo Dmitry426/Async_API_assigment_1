@@ -24,10 +24,8 @@ class PersonService:
             try:
                 person = await self._get_person_from_elastic(person_id)
             except NotFoundError:
-                person = None
-
-            if not person:
                 return None
+
             await self.redis.put_obj_to_cache(person, str(person_id))
 
         return person

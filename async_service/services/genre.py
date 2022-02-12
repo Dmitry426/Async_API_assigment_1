@@ -24,10 +24,8 @@ class GenreService:
             try:
                 genre = await self._get_genre_from_elastic(genre_id)
             except NotFoundError:
-                genre = None
-
-            if not genre:
                 return None
+
             await self.redis.put_obj_to_cache(genre, str(genre.id))
 
         return genre
