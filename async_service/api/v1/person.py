@@ -55,4 +55,4 @@ async def person_list(
         page_number: int = Query(1, alias="page[number]"),
 ) -> List[Person]:
     films = await film_service.get_films_by_person(page_size=page_size, page_number=page_number, person_id=person_id)
-    return [FilmList(id=film.id, title=film.title, imdb_rating=film.imdb_rating) for film in films]
+    return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]

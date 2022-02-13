@@ -39,7 +39,7 @@ async def film_search(
         page_number: int = Query(1, alias="page[number]")
 ) -> List[FilmList]:
     films = await film_service.get_list(page_size=page_size, page_number=page_number, query=query)
-    return [FilmList(id=film.id, title=film.title, imdb_rating=film.imdb_rating) for film in films]
+    return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]
 
 
 @router.get(
@@ -53,10 +53,7 @@ async def film_details(
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
 
-    return FilmDetail(
-        id=film.id, title=film.title, imdb_rating=film.imdb_rating, description=film.description,
-        genres=film.genres, actors=film.actors, writers=film.writers, directors=film.directors
-        )
+    return FilmDetail(**film.dict(exclude={"actors_names", "writers_names"}))
 
 
 @router.get(
@@ -70,4 +67,4 @@ async def film_list(
         filter_genre: Optional[UUID] = Query(None, alias="filter[genre]")
 ) -> List[FilmList]:
     films = await film_service.get_list(page_size=page_size, page_number=page_number, sort=sort, genre_id=filter_genre)
-    return [FilmList(id=film.id, title=film.title, imdb_rating=film.imdb_rating) for film in films]
+    return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]
