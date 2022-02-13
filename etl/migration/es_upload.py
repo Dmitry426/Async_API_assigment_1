@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable
 
 import backoff
-from elasticsearch import Elasticsearch, ConnectionError
+from elasticsearch import ConnectionError, Elasticsearch
 from elasticsearch.helpers import bulk
 
 logger = logging.getLogger(__name__)
