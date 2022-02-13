@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable
 
 import backoff
-from elasticsearch import Elasticsearch, ElasticsearchException
+from elasticsearch import Elasticsearch, ConnectionError
 from elasticsearch.helpers import bulk
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class UploadBatch:
             with open(current_path / f'index_schemas/{self.current_index}.json') as json_file:
                 self.request_body = json.load(json_file)
         except FileNotFoundError:
-            logger.exception('Additional information about an error')
+            logger.exception('Index schema json file does not exists ')
 
     def _push_index(self):
         """Method to keep index automatically updated"""
@@ -43,7 +43,7 @@ class UploadBatch:
                 "_source": item
             }
 
-    @backoff.on_exception(backoff.expo, ElasticsearchException, max_time=60)
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
     def es_push_batch(self, data: Iterable):
         self._push_index()
         bulk(self.es, self._generate_data(data=data))
