@@ -28,14 +28,14 @@ class UnifiedProcess:
     def migrate(self):
         try:
             producer_data = self.config.producer_queries
-            updated_ids = self.__get_updated_item_ids(producer_data)
+            updated_ids = self._get_updated_item_ids(producer_data)
 
             for rich_data in self.enrich_data(updated_ids):
                 ready_data = self.transform(rich_data)
                 self._es_upload_batch(ready_data)
 
         except Exception:
-            logger.exception('Additional information about an error')
+            logger.exception('During  postgres data processing an error occurred ')
 
         if self._local_state:
             self.state.storage.save_state(self._local_state)
@@ -73,18 +73,18 @@ class UnifiedProcess:
             return items
         return [validation_model.parse_obj(item).dict() for item in items]
 
-    def __handle_no_date(self, query_data) -> str:
+    def _handle_no_date(self, query_data) -> str:
         updated_at = self.state.get_state(f'{query_data.table}_updated_at')
         latest_value = updated_at if updated_at else datetime.min.isoformat()
 
         sql_query_params = f"""WHERE {query_data.state_field} > ('{latest_value}')"""
         return sql_query_params
 
-    def __get_updated_item_ids(self, producer_data: List) -> set:
+    def _get_updated_item_ids(self, producer_data: List) -> set:
         with self.conn_postgres.cursor() as cursor:
             items = set()
             for data in producer_data:
-                query_tail = self.__handle_no_date(data)
+                query_tail = self._handle_no_date(data)
                 query = ' '.join([data.query, query_tail])
 
                 mogrify_query = cursor.mogrify(query)

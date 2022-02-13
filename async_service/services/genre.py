@@ -2,13 +2,14 @@ from functools import lru_cache
 from typing import List, Optional
 
 from aioredis import Redis
-from db.elastic import get_elastic
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Search
 from fastapi import Depends
-from models.genre import Genre
 from pydantic.validators import UUID
+
+from db.elastic import get_elastic
+from models.genre import Genre
 from services.cache import RedisBackend, get_redis_backend_service
 
 

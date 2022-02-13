@@ -1,18 +1,9 @@
 from typing import List, Optional
 
-import orjson
 from pydantic import BaseModel
 from pydantic.validators import UUID
 
-
-def orjson_dumps(v, *, default):
-    return orjson.dumps(v, default=default).decode()
-
-
-class JsonConfig(BaseModel):
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
+from .base import JsonConfig
 
 
 class PersonGenreFilm(BaseModel):
