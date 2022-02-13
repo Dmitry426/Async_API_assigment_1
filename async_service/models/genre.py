@@ -1,6 +1,6 @@
 from pydantic.validators import UUID
 
-from .film import JsonConfig
+from .base import JsonConfig
 
 
 class Genre(JsonConfig):
