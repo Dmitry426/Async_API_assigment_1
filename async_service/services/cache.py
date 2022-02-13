@@ -3,9 +3,10 @@ from functools import lru_cache
 from typing import List, Type, Union
 
 from aioredis import Redis
-from db.redis import get_redis
 from fastapi import Depends
 from pydantic import BaseModel
+
+from db.redis import get_redis
 
 
 class RedisBackend:
