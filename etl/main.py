@@ -3,14 +3,15 @@ from time import sleep
 import backoff
 import psycopg2
 import schedule
+from dotenv import load_dotenv
+from psycopg2 import OperationalError
+from psycopg2.extras import DictCursor
+
 from config_validation.config import Config
 from config_validation.db_settings import DSNSettings, ESSettings
 from config_validation.indexes import FilmWork, Genre, Person
-from dotenv import load_dotenv
 from logger import logger
 from migration import UnifiedProcess
-from psycopg2 import OperationalError
-from psycopg2.extras import DictCursor
 
 config = Config.parse_file("config.json")
 
@@ -66,4 +67,4 @@ if __name__ == "__main__":
             schedule.run_pending()
             sleep(1)
     except psycopg2.OperationalError:
-        logger.exception('Additional information about an error')
+        logger.exception('Postgres connection operational error')
