@@ -9,6 +9,7 @@ services:
 
   async_server:
     build: ./async_service
+    image: async_server
     command: python main.py
     env_file:
       - ./.env
