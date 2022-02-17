@@ -26,19 +26,13 @@
       environment:
         - node.name=es01
         - discovery.type=single-node
-      volumes:
-        - data_es:/usr/share/elasticsearch/data
+        - ELASTIC_PASSWORD=1234
       ports:
         - 9200:9200
 
     redis_server_test:
       image: 'redis:alpine'
-      volumes:
-        - data_redis:/data
       ports:
         - "6379:6379"
       restart: always
 
-  volumes:
-    data_es:
-    data_redis:
