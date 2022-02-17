@@ -2,14 +2,43 @@
     async_server_test:
       image: async_server
       build: ../async_service
-      command: uvicorn main:app --host 0.0.0.0 --port 8000
+      command: ["python", "main.py"]
+      depends_on:
+        - es01_test
+        - redis_server_test
+        - test
       env_file:
         - ./.env
-      healthcheck:
-        test: curl -s http://localhost:8000 >/dev/null || exit 1
-        interval: 30s
-        timeout: 10s
-        retries: 50
       ports:
         - '8000:8000'
 
+    test:
+      build: ./functional
+      entrypoint: ./entrypoint.sh
+      env_file:
+        - ./.env
+      links:
+        - redis_server_test
+        - es01_test
+
+    es01_test:
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+      environment:
+        - node.name=es01
+        - discovery.type=single-node
+      volumes:
+        - data_es:/usr/share/elasticsearch/data
+      ports:
+        - 9200:9200
+
+    redis_server_test:
+      image: 'redis:alpine'
+      volumes:
+        - data_redis:/data
+      ports:
+        - "6379:6379"
+      restart: always
+
+  volumes:
+    data_es:
+    data_redis:
