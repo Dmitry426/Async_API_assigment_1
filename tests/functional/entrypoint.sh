@@ -15,7 +15,7 @@ until curl http://"$es_host":"$es_port"; do
   sleep 1
 done
 
->&2 echo "Es Container is running ok"
+>&2 echo "Es Container is running fine"
 
 >&2 echo "!!!!!!!! Check redis status:available !!!!!!!!"
 
@@ -24,6 +24,7 @@ until redis-cli -h "$redis_host" -p "$redis_port" ; do
   sleep 1
 done
 
->&2 echo "Redis Container is running ok"
+>&2 echo "Redis Container is running fine"
+
 
 exec  echo "Here is main test command running"
