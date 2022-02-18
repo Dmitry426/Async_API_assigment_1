@@ -1,12 +1,19 @@
+import json
+from dataclasses import dataclass
+
+import aiofiles
 import aiohttp
 import pytest
-
-from dataclasses import dataclass
-from multidict import CIMultiDictProxy
+from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
-from coresings import
+from multidict import CIMultiDictProxy
+
+from .core.settings import EsSettings, RedisSettings, UvicornURL
+
 load_dotenv()
-es_settings = ESSettings().dict()
+ES_SETTINGS = EsSettings().dict()
+REDIS_SETTINGS = RedisSettings.dict()
+SERVICE_URL = UvicornURL().dict()
 
 
 @dataclass
@@ -16,9 +23,17 @@ class HTTPResponse:
     status: int
 
 
+@pytest.fixture(scope='session')
+async def load_data(path=str, data_name=str):
+    async with aiofiles.open(f'{path}/{data_name}.json') as file:
+        data = await(file.read())
+    result = json.loads(data)
+    return result
+
+
 @pytest.fixture(scope='session', name="es_client")
-async def es_client():
-    client = AsyncElasticsearch(hosts='127.0.0.1:9200')
+async def es_client(load_data):
+    client = AsyncElasticsearch([f"{ES_SETTINGS['host']}:{ES_SETTINGS['port']}"])
     yield client
     await client.close()
 
@@ -34,7 +49,7 @@ async def session():
 def make_get_request(session):
     async def inner(method: str, params: dict = None) -> HTTPResponse:
         params = params or {}
-        url = SERVICE_URL + '/api/v1' + method
+        url = f'http://{SERVICE_URL["host"]}:{SERVICE_URL["port"]}/api/v1{method}'
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),
@@ -43,5 +58,3 @@ def make_get_request(session):
             )
 
     return inner
-
-
