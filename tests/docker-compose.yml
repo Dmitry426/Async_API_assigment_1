@@ -26,7 +26,6 @@
       environment:
         - node.name=es01
         - discovery.type=single-node
-        - ELASTIC_PASSWORD=1234
       ports:
         - 9200:9200
 
