@@ -1,0 +1,5 @@
+{
+  "index_path":"../testdata/index_schemas",
+  "data_path": "../testdata/",
+  "api_path": "/api/v1"
+}
