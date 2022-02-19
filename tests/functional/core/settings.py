@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic.env_settings import BaseSettings
 from pydantic.fields import Field
 
@@ -29,6 +31,7 @@ class UvicornURL(BaseSettings):
         env_file_encoding = "utf-8"
 
 
-class BasePath(BaseSettings):
-    index_path: str = Field('./testdata/index_schemas', env="INDEX_PATH")
-    data_path: str = Field('./testdata', env="DATA_PATH")
+class TestSettings(BaseSettings):
+    index_path: str
+    data_path: str
+    api_path: str
