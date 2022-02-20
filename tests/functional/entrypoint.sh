@@ -26,5 +26,5 @@ done
 
 >&2 echo "Redis Container is running fine"
 
-
-exec  echo "Here is main test command running"
+pytest /tests/functional/src --strict
+exec
