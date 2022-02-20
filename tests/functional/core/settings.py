@@ -35,3 +35,4 @@ class TestSettings(BaseSettings):
     index_path: str
     data_path: str
     api_path: str
+    es_indexes: List[str]
