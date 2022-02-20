@@ -1,5 +1,6 @@
 {
-  "index_path":"../testdata/index_schemas",
-  "data_path": "../testdata/",
-  "api_path": "/api/v1"
+  "index_path":"./testdata/index_schemas",
+  "data_path": "./testdata/",
+  "api_path": "/api/v1",
+  "es_indexes": ["genres","movies", "persons"]
 }
