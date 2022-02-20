@@ -1,8 +1,10 @@
+import asyncio
 import json
 from dataclasses import dataclass
 
 import aiofiles
 import aiohttp
+import aioredis
 import pytest
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
@@ -17,7 +19,7 @@ ES_SETTINGS = EsSettings().dict()
 REDIS_SETTINGS = RedisSettings().dict()
 SERVICE_URL = UvicornURL().dict()
 
-config = TestSettings.parse_file('../test_config.json')
+config = TestSettings.parse_file('./test_config.json')
 
 
 @dataclass
@@ -25,13 +27,6 @@ class HTTPResponse:
     body: dict
     headers: CIMultiDictProxy[str]
     status: int
-
-
-async def load_data(path, data_name) -> str:
-    async with aiofiles.open(f'{path}/{data_name}.json') as file:
-        data = await(file.read())
-    result = json.loads(data)
-    return result
 
 
 @pytest.fixture(scope='session', name="es_client")
@@ -42,18 +37,47 @@ async def es_client():
 
 
 @pytest.fixture(scope='function')
-def manage_elastic_data(es_client):
-    async def inner(data_chunk, index) -> str:
-        index_body = await load_data(path=config.index_path, data_name=index)
-        await es_client.indices.create(index=index, body=index_body)
-        result = await load_data(path=config.data_path, data_name=data_chunk)
-        await async_bulk(es_client, result)
-
-        yield result
-
-        await es_client.indices.delete(index=index)
+def create_es_index(es_client):
+    async def inner(index) -> str:
+        if not await es_client.indices.exists(index=index):
+            async with aiofiles.open(f'{config.index_path}/{index}.json') as file:
+                data = await(file.read())
+            result = json.loads(data)
+            await es_client.indices.create(index=index, body=result)
 
     return inner
+
+
+@pytest.fixture(scope='function')
+def load_test_data(es_client):
+    async def inner(index) -> str:
+        if not await es_client.indices.exists(index=index):
+            async with aiofiles.open(f'{config.data_path}/{index}.json') as file:
+                data = await(file.read())
+            result = json.loads(data)
+            await async_bulk(es_client, result)
+
+    return inner
+
+
+@pytest.fixture(scope='function')
+async def remove_es_data(es_client):
+
+    yield None
+    remove_index = []
+    for index in config.es_indexes:
+        if await es_client.indices.exists(index=index):
+            remove_index.append(index)
+    await es_client.indices.delete(index=remove_index)
+
+
+@pytest.fixture(scope='session')
+async def redis_connection():
+    redis = await aioredis.create_redis_pool(
+        (REDIS_SETTINGS['host'], REDIS_SETTINGS['port']), minsize=10, maxsize=20
+    )
+    yield redis
+    await redis.close()
 
 
 @pytest.fixture(scope='session')
@@ -61,6 +85,13 @@ async def session():
     session = aiohttp.ClientSession()
     yield session
     await session.close()
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture
