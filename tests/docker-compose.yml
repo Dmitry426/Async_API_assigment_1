@@ -1,37 +1,43 @@
-  services:
-    async_server_test:
-      image: async_server
-      build: ../async_service
-      command: ["python", "main.py"]
-      depends_on:
+services:
+  async_server_test:
+    image: async_server
+    build: ../async_service
+    command: ["python", "main.py"]
+    depends_on:
         - es01_test
         - redis_server_test
         - test
-      env_file:
+    env_file:
         - ./.env
-      ports:
+    ports:
         - '8000:8000'
 
-    test:
-      build: ./functional
-      entrypoint: ./entrypoint.sh
-      env_file:
-        - ./.env
-      links:
-        - redis_server_test
-        - es01_test
+  test:
+    build: ./functional
+    entrypoint: ./entrypoint.sh
+    env_file:
+      - ./.env
+    links:
+      - redis_server_test
+      - es01_test
 
-    es01_test:
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
-      environment:
-        - node.name=es01
-        - discovery.type=single-node
-      ports:
-        - 9200:9200
+  es01_test:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+    volumes:
+      - data_es_test:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
 
-    redis_server_test:
-      image: 'redis:alpine'
-      ports:
-        - "6379:6379"
-      restart: always
+  redis_server_test:
+    image: 'redis:alpine'
+    volumes:
+      - data_redis_test:/data
+    ports:
+      - "6379:6379"
 
+volumes:
+  data_es_test:
+  data_redis_test:
