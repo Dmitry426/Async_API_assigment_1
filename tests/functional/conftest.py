@@ -1,11 +1,13 @@
 import asyncio
 import json
 from dataclasses import dataclass
+from typing import Iterable
+
 
 import aiofiles
 import aiohttp
 import aioredis
-import pytest
+import pytest_asyncio
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
@@ -29,72 +31,81 @@ class HTTPResponse:
     status: int
 
 
-@pytest.fixture(scope='session', name="es_client")
+def generate_data(index, data: Iterable):
+    for item in data:
+        yield {
+            "_index": index,
+            "_id": item["id"],
+            "_source": item
+        }
+
+
+async def remove_es_indexes(elastic_client):
+    remove_index = []
+    for index in config.es_indexes:
+        if await elastic_client.indices.exists(index=index):
+            remove_index.append(index)
+    await elastic_client.indices.delete(index=remove_index)
+
+
+async def load_json_data(file_path, index):
+    async with aiofiles.open(f'{file_path}/{index}.json') as file:
+        data = await(file.read())
+    result = json.loads(data)
+    return result
+
+
+async def load_test_data(elastic_client, index):
+    result = await load_json_data(file_path=config.data_path, index=index)
+    await async_bulk(elastic_client, generate_data(index, result))
+    await asyncio.sleep(1)
+
+
+async def create_es_index(elastic_client, index):
+    if not await elastic_client.indices.exists(index=index):
+        result = await load_json_data(file_path=config.index_path, index=index)
+        await elastic_client.indices.create(index=index, body=result)
+    await asyncio.sleep(1)
+
+
+@pytest_asyncio.fixture(scope='session', name="es_client")
 async def es_client():
     client = AsyncElasticsearch(hosts=f'http://{ES_SETTINGS["host"]}:{ES_SETTINGS["port"]}')
+    for index in config.es_indexes:
+        await create_es_index(elastic_client=client, index=index)
+        await load_test_data(elastic_client=client, index=index)
     yield client
+    # await remove_es_indexes(elastic_client=client)
     await client.close()
 
 
-@pytest.fixture(scope='function')
-def create_es_index(es_client):
-    async def inner(index) -> str:
-        if not await es_client.indices.exists(index=index):
-            async with aiofiles.open(f'{config.index_path}/{index}.json') as file:
-                data = await(file.read())
-            result = json.loads(data)
-            await es_client.indices.create(index=index, body=result)
-
-    return inner
-
-
-@pytest.fixture(scope='function')
-def load_test_data(es_client):
-    async def inner(index) -> str:
-        if not await es_client.indices.exists(index=index):
-            async with aiofiles.open(f'{config.data_path}/{index}.json') as file:
-                data = await(file.read())
-            result = json.loads(data)
-            await async_bulk(es_client, result)
-
-    return inner
-
-
-@pytest.fixture(scope='function')
-async def remove_es_data(es_client):
-
-    yield None
-    remove_index = []
-    for index in config.es_indexes:
-        if await es_client.indices.exists(index=index):
-            remove_index.append(index)
-    await es_client.indices.delete(index=remove_index)
-
-
-@pytest.fixture(scope='session')
-async def redis_connection():
-    redis = await aioredis.create_redis_pool(
-        (REDIS_SETTINGS['host'], REDIS_SETTINGS['port']), minsize=10, maxsize=20
+@pytest_asyncio.fixture(name="redis_client", scope="session")
+async def redis_client_fixture():
+    redis = aioredis.from_url(
+        f"redis://{REDIS_SETTINGS['host']}:{REDIS_SETTINGS['port']}",
+        encoding="utf8",
+        decode_responses=True,
     )
     yield redis
+    await redis.flushall()
     await redis.close()
 
 
-@pytest.fixture(scope='session')
-async def session():
-    session = aiohttp.ClientSession()
-    yield session
-    await session.close()
-
-
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 def event_loop():
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope='session')
+async def session():
+    session_aio = aiohttp.ClientSession()
+    yield session_aio
+    await session_aio.close()
+
+
+@pytest_asyncio.fixture(scope='function')
 def make_get_request(session):
     async def inner(method: str, params: dict = None) -> HTTPResponse:
         params = params or {}
