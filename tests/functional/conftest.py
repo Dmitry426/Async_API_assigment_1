@@ -1,13 +1,15 @@
 import asyncio
 import json
 from dataclasses import dataclass
-from typing import Iterable
-
+from typing import Dict, Any
 
 import aiofiles
 import aiohttp
 import aioredis
 import pytest_asyncio
+import logging
+import elasticsearch
+
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
@@ -15,6 +17,11 @@ from multidict import CIMultiDictProxy
 
 from .core.settings import EsSettings, RedisSettings, UvicornURL
 from .core.settings import TestSettings
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+es_logger = elasticsearch.logger
+es_logger.setLevel(elasticsearch.logging.WARNING)
 
 load_dotenv()
 ES_SETTINGS = EsSettings().dict()
@@ -24,6 +31,7 @@ SERVICE_URL = UvicornURL().dict()
 config = TestSettings.parse_file('./test_config.json')
 
 
+
 @dataclass
 class HTTPResponse:
     body: dict
@@ -31,13 +39,9 @@ class HTTPResponse:
     status: int
 
 
-def generate_data(index, data: Iterable):
+def generate_data(index: str, data: Dict) -> Dict:
     for item in data:
-        yield {
-            "_index": index,
-            "_id": item["id"],
-            "_source": item
-        }
+        yield dict(_index=index, _id=item["id"], _source=item)
 
 
 async def remove_es_indexes(elastic_client):
@@ -48,20 +52,20 @@ async def remove_es_indexes(elastic_client):
     await elastic_client.indices.delete(index=remove_index)
 
 
-async def load_json_data(file_path, index):
+async def load_json_data(file_path: str, index: str) -> Dict[str, Any]:
     async with aiofiles.open(f'{file_path}/{index}.json') as file:
         data = await(file.read())
     result = json.loads(data)
     return result
 
 
-async def load_test_data(elastic_client, index):
+async def load_test_data(elastic_client: AsyncElasticsearch, index: str):
     result = await load_json_data(file_path=config.data_path, index=index)
     await async_bulk(elastic_client, generate_data(index, result))
     await asyncio.sleep(1)
 
 
-async def create_es_index(elastic_client, index):
+async def create_es_index(elastic_client: AsyncElasticsearch, index: str):
     if not await elastic_client.indices.exists(index=index):
         result = await load_json_data(file_path=config.index_path, index=index)
         await elastic_client.indices.create(index=index, body=result)
@@ -69,18 +73,18 @@ async def create_es_index(elastic_client, index):
 
 
 @pytest_asyncio.fixture(scope='session', name="es_client")
-async def es_client():
+async def es_client() -> AsyncElasticsearch:
     client = AsyncElasticsearch(hosts=f'http://{ES_SETTINGS["host"]}:{ES_SETTINGS["port"]}')
     for index in config.es_indexes:
         await create_es_index(elastic_client=client, index=index)
         await load_test_data(elastic_client=client, index=index)
     yield client
-    # await remove_es_indexes(elastic_client=client)
+    await remove_es_indexes(elastic_client=client)
     await client.close()
 
 
 @pytest_asyncio.fixture(name="redis_client", scope="session")
-async def redis_client_fixture():
+async def redis_client_fixture() -> aioredis:
     redis = aioredis.from_url(
         f"redis://{REDIS_SETTINGS['host']}:{REDIS_SETTINGS['port']}",
         encoding="utf8",
