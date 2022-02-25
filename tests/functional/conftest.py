@@ -1,22 +1,20 @@
 import asyncio
 import json
+import logging
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
 
 import aiofiles
 import aiohttp
 import aioredis
-import pytest_asyncio
-import logging
 import elasticsearch
-
+import pytest_asyncio
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 from multidict import CIMultiDictProxy
 
-from .core.settings import EsSettings, RedisSettings, UvicornURL
-from .core.settings import TestSettings
+from .core.settings import EsSettings, RedisSettings, TestSettings, UvicornURL
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -28,8 +26,7 @@ ES_SETTINGS = EsSettings().dict()
 REDIS_SETTINGS = RedisSettings().dict()
 SERVICE_URL = UvicornURL().dict()
 
-config = TestSettings.parse_file('./test_config.json')
-
+config = TestSettings.parse_file("./test_config.json")
 
 
 @dataclass
@@ -53,8 +50,8 @@ async def remove_es_indexes(elastic_client):
 
 
 async def load_json_data(file_path: str, index: str) -> Dict[str, Any]:
-    async with aiofiles.open(f'{file_path}/{index}.json') as file:
-        data = await(file.read())
+    async with aiofiles.open(f"{file_path}/{index}.json") as file:
+        data = await (file.read())
     result = json.loads(data)
     return result
 
@@ -72,14 +69,16 @@ async def create_es_index(elastic_client: AsyncElasticsearch, index: str):
     await asyncio.sleep(1)
 
 
-@pytest_asyncio.fixture(scope='session', name="es_client")
+@pytest_asyncio.fixture(scope="session", name="es_client")
 async def es_client() -> AsyncElasticsearch:
-    client = AsyncElasticsearch(hosts=f'http://{ES_SETTINGS["host"]}:{ES_SETTINGS["port"]}')
+    client = AsyncElasticsearch(
+        hosts=f'http://{ES_SETTINGS["host"]}:{ES_SETTINGS["port"]}'
+    )
     for index in config.es_indexes:
         await create_es_index(elastic_client=client, index=index)
         await load_test_data(elastic_client=client, index=index)
     yield client
-    await remove_es_indexes(elastic_client=client)
+    # await remove_es_indexes(elastic_client=client)
     await client.close()
 
 
@@ -102,14 +101,14 @@ def event_loop():
     loop.close()
 
 
-@pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture(scope="session")
 async def session():
     session_aio = aiohttp.ClientSession()
     yield session_aio
     await session_aio.close()
 
 
-@pytest_asyncio.fixture(scope='function')
+@pytest_asyncio.fixture(scope="function")
 def make_get_request(session):
     async def inner(method: str, params: dict = None) -> HTTPResponse:
         params = params or {}
