@@ -1,14 +1,16 @@
 import logging
 import os
 
-import aioredis
 import uvicorn
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 
 from api.v1 import film, genre, person
+from db.redis import get_redis
 from core import config
 from core.logger import LOGGING
 from db import elastic, redis
@@ -25,9 +27,8 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup():
-    redis.redis = await aioredis.create_redis_pool(
-        (config.REDIS_HOST, config.REDIS_PORT), minsize=10, maxsize=20
-    )
+    FastAPICache.init(RedisBackend(get_redis()), prefix="fastapi-cache")
+
     elastic.es = AsyncElasticsearch(
         hosts=[f"{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
     )
