@@ -1,18 +1,30 @@
 services:
   etl:
-    build: ./etl
+    build:
+      context: .
+      target: development
     env_file:
       - ./.env
+    command: [ "python", "-m", "etl" ]
+    volumes:
+      - "./etl:/src/etl"
     links:
       - postgres
       - es01
 
   async_server:
-    build: ./async_service
+    build:
+      context: .
+      target: development
     image: async_server
-    command: python main.py
+    ports:
+      - "127.0.0.1:8000:8000"
     env_file:
       - ./.env
+    command: [ "python", "-m", "async_service" ]
+
+    volumes:
+      - "./async_service:/src/async_service"
     depends_on:
       - es01
       - redis_server
