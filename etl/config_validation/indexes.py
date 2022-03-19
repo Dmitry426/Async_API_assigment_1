@@ -17,7 +17,7 @@ class GenreFilmWork(BaseModel):
 
 class FilmWork(BaseModel):
     id: UUID
-    imdb_rating: float = None
+    rating: float = None
     genres: Optional[List[GenreFilmWork]]
     title: str = None
     description: str = None
@@ -31,6 +31,9 @@ class FilmWork(BaseModel):
     def handle_empty_str(cls, variable: str) -> str:
         return variable if variable else None
 
+    @validator("rating")
+    def handle_empty_float(cls, variable: float) -> float:
+        return variable if variable else None
 
 class Person(BaseModel):
     id: UUID
