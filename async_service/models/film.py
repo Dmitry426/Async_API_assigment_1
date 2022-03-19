@@ -13,7 +13,7 @@ class PersonGenreFilm(BaseModel):
 
 class Film(JsonConfig):
     id: UUID
-    imdb_rating: float = None
+    rating: float = None
     genres: Optional[List[PersonGenreFilm]]
     title: str = None
     description: str = None
