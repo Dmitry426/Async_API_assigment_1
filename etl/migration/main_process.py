@@ -12,7 +12,9 @@ class UnifiedProcess:
     validation_model = None
     _local_state = {}
 
-    def __init__(self, config, postgres_connection, es_settings: dict, es_index_name: str):
+    def __init__(
+        self, config, postgres_connection, es_settings: dict, es_index_name: str
+    ):
         self.config = config
         self.conn_postgres = postgres_connection
         json_storage = JsonFileStorage(file_path=self.config.state_file_path)
@@ -23,7 +25,7 @@ class UnifiedProcess:
         self.es_index_name = es_index_name
 
     def get_validation_model(self):
-        return getattr(self, 'validation_model')
+        return getattr(self, "validation_model")
 
     def migrate(self):
         try:
@@ -35,7 +37,7 @@ class UnifiedProcess:
                 self._es_upload_batch(ready_data)
 
         except Exception:
-            logger.exception('During  postgres data processing an error occurred ')
+            logger.exception("During  postgres data processing an error occurred ")
 
         if self._local_state:
             self.state.storage.save_state(self._local_state)
@@ -55,7 +57,7 @@ class UnifiedProcess:
             query = self.config.enricher_query
 
             for offset in self._get_offset(self.config.limit):
-                limited_query = f'{query} LIMIT {self.config.limit} OFFSET {offset}'
+                limited_query = f"{query} LIMIT {self.config.limit} OFFSET {offset}"
                 cursor.execute(limited_query, (tuple(item_ids),))
 
                 enriched_data = cursor.fetchall()
@@ -74,7 +76,7 @@ class UnifiedProcess:
         return [validation_model.parse_obj(item).dict() for item in items]
 
     def _handle_no_date(self, query_data) -> str:
-        updated_at = self.state.get_state(f'{query_data.table}_updated_at')
+        updated_at = self.state.get_state(f"{query_data.table}_updated_at")
         latest_value = updated_at if updated_at else datetime.min.isoformat()
 
         sql_query_params = f"""WHERE {query_data.state_field} > ('{latest_value}')"""
@@ -85,7 +87,7 @@ class UnifiedProcess:
             items = set()
             for data in producer_data:
                 query_tail = self._handle_no_date(data)
-                query = ' '.join([data.query, query_tail])
+                query = " ".join([data.query, query_tail])
 
                 mogrify_query = cursor.mogrify(query)
                 cursor.execute(mogrify_query)
@@ -94,7 +96,7 @@ class UnifiedProcess:
 
                 if query_data:
                     latest_date = max(item[1] for item in query_data)
-                    updated_field_name = f'{data.table}_updated_at'
+                    updated_field_name = f"{data.table}_updated_at"
                     self._local_state[updated_field_name] = str(latest_date)
             return items
 

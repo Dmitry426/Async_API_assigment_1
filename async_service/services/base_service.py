@@ -16,7 +16,7 @@ class FilmService(EsService, ABC):
 
 
 def get_film_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(elastic)
 
@@ -27,7 +27,7 @@ class GenreService(EsService, ABC):
 
 
 def get_genre_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
     return GenreService(elastic)
 
@@ -38,6 +38,6 @@ class PersonService(EsService, ABC):
 
 
 def get_person_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
     return PersonService(elastic)

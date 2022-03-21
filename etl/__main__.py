@@ -39,7 +39,7 @@ def migrate_to_etl():
             config=config.film_work_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='movies'
+            es_index_name="movies",
         )
         film_work_to_es.migrate()
 
@@ -47,7 +47,7 @@ def migrate_to_etl():
             config=config.person_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='persons'
+            es_index_name="persons",
         )
         person_to_es.migrate()
 
@@ -55,7 +55,7 @@ def migrate_to_etl():
             config=config.genre_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='genres'
+            es_index_name="genres",
         )
         genre_to_es.migrate()
 
@@ -67,4 +67,4 @@ if __name__ == "__main__":
             schedule.run_pending()
             sleep(1)
     except psycopg2.OperationalError:
-        logger.exception('Postgres connection operational error')
+        logger.exception("Postgres connection operational error")

@@ -1,16 +1,15 @@
-
 from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
-from async_service.api.v1 import film, person, genre
-from .db.redis import get_redis
+from async_service.api.v1 import film, genre, person
+
 from .core import config
 from .db import elastic, redis
+from .db.redis import get_redis
 
 load_dotenv()
 

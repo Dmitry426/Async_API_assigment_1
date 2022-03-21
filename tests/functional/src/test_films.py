@@ -56,7 +56,11 @@ class TestFilm:
     async def test_sort_by_genre_success(self, make_get_request):
         response = await make_get_request(
             url=PATH,
-            params={"page[size]": 10, "page[number]": 1, "filter[genre]": f"{self.genre_id}"},
+            params={
+                "page[size]": 10,
+                "page[number]": 1,
+                "filter[genre]": f"{self.genre_id}",
+            },
         )
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)

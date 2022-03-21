@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import aiofiles
 import aioredis
@@ -53,12 +53,16 @@ async def load_json_data(file_path: str, index: str) -> Dict[str, Any]:
     return result
 
 
-async def load_test_data(elastic_client: AsyncElasticsearch, index: str, settings: TestSettings):
+async def load_test_data(
+    elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
+):
     result = await load_json_data(file_path=settings.data_path, index=index)
     await async_bulk(elastic_client, generate_data(index, result))
 
 
-async def create_es_index(elastic_client: AsyncElasticsearch, index: str, settings: TestSettings):
+async def create_es_index(
+    elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
+):
     if not await elastic_client.indices.exists(index=index):
         result = await load_json_data(file_path=settings.index_path, index=index)
         await elastic_client.indices.create(index=index, body=result)
@@ -68,9 +72,9 @@ async def create_es_index(elastic_client: AsyncElasticsearch, index: str, settin
 @pytest_asyncio.fixture(scope="session", name="es_client")
 async def es_client(settings: TestSettings) -> AsyncElasticsearch:
     client = AsyncElasticsearch(
-        hosts=f'http://{settings.es_settings.host}:{settings.es_settings.port}'
+        hosts=f"http://{settings.es_settings.host}:{settings.es_settings.port}"
     )
-    await wait_for_ping(client=client,settings=settings)
+    await wait_for_ping(client=client, settings=settings)
     for index in settings.es_indexes:
         await create_es_index(elastic_client=client, index=index, settings=settings)
         await load_test_data(elastic_client=client, index=index, settings=settings)
@@ -107,11 +111,14 @@ async def http_client_fixture(settings, redis_client, es_client) -> ClientSessio
     check they are ready to work.
     """
     async with ClientSession(
-            base_url=f"http://{settings.url_settings.host}:{settings.url_settings.port}") as session:
+        base_url=f"http://{settings.url_settings.host}:{settings.url_settings.port}"
+    ) as session:
         yield session
 
 
-async def wait_for_ping(client: Union[Redis, AsyncElasticsearch], settings: TestSettings):
+async def wait_for_ping(
+    client: Union[Redis, AsyncElasticsearch], settings: TestSettings
+):
     """Wait for service client to answer"""
     client_name = type(client).__name__
 
@@ -133,9 +140,9 @@ def make_get_request(http_client: ClientSession):
     """Make HTTP-request"""
 
     async def inner(
-            url: str,
-            params: Optional[Dict[str, Any]] = None,
-            jwt: Optional[str] = None,
+        url: str,
+        params: Optional[Dict[str, Any]] = None,
+        jwt: Optional[str] = None,
     ) -> HTTPResponse:
         params = params or {}
         headers = {}
@@ -145,9 +152,7 @@ def make_get_request(http_client: ClientSession):
 
         logger.debug("URL: %s", url)
 
-        async with http_client.get(
-                url, params=params, headers=headers
-        ) as response:
+        async with http_client.get(url, params=params, headers=headers) as response:
             body = await response.json()
             logger.warning("Response: %s", body)
 

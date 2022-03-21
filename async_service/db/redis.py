@@ -3,6 +3,7 @@ from typing import Optional
 
 import aioredis
 from aioredis import Redis
+
 from async_service.core import config
 
 redis: Optional[Redis] = None
