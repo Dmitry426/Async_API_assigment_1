@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 from psycopg2 import OperationalError
 from psycopg2.extras import DictCursor
 
-from config_validation.config import Config
-from config_validation.db_settings import DSNSettings, ESSettings
-from config_validation.indexes import FilmWork, Genre, Person
-from logger import logger
-from migration import UnifiedProcess
+from etl.config_validation.config import Config
+from etl.config_validation.db_settings import DSNSettings, ESSettings
+from etl.config_validation.indexes import FilmWork, Genre, Person
+from etl.logger import logger
+from etl.migration import UnifiedProcess
 
 config = Config.parse_file("config.json")
 
