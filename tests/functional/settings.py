@@ -24,7 +24,8 @@ class TestSettings(BaseSettings):
     es_settings: EsSettings = EsSettings()
     redis_settings: RedisSettings = RedisSettings()
     url_settings: UvicornURL = UvicornURL()
-    index_path: str = Field("./testdata/index_schemas")
-    data_path: str = Field("./testdata/")
+    index_path: str = Field("testdata/index_schemas")
+    data_path: str = Field("testdata/")
     api_path: str = Field("/api/v1")
-    es_indexes: List[str] = List["genres", "movies", "persons"]
+    es_indexes: List[str] = ["genres", "movies", "persons"]
+    ping_timeout: int = Field(30, env="PING_BACKOFF_TIMEOUT")
