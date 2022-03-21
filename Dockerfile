@@ -65,7 +65,7 @@ RUN poetry install
 WORKDIR /src
 
 EXPOSE $PORT_APP
-CMD python -mpython = "^3.8"
+
 
 
 # `production` image used for runtime
