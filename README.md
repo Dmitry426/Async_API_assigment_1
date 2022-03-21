@@ -13,8 +13,18 @@ This project supports Ubuntu Linux 18.04  It is not tested or supported for the 
 ```bash
 $ docker-compose up -d  --bulid 
 ```
+# Or locally
+```bash
+$  python -m async_service
+```
+ # You can run tests . 
 
-# Notes 
-- Python:slim image in docker  course uvicorn using specific dependencies
-- In order to run Alpine version all orjson dependencies must be in requirements.txt 
-- Uvicorn is run from main.py in order to use custom logger  .
+```bash
+$  make test 
+```
+
+# Clean tests
+
+```bash
+$  make test-cleanup
+```
