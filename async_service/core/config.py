@@ -3,9 +3,10 @@ from logging import config as logging_config
 
 
 from dotenv import load_dotenv
+from async_service.core.logger import LOGGING
 
-from async_service import LOGGING
 
+logging_config.dictConfig(LOGGING)
 load_dotenv()
 
 logging_config.dictConfig(LOGGING)
