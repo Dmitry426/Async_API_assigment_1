@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 from psycopg2 import OperationalError
 from psycopg2.extras import DictCursor
 
-from config_validation.config import Config
-from config_validation.db_settings import DSNSettings, ESSettings
-from config_validation.indexes import FilmWork, Genre, Person
-from logger import logger
-from migration import UnifiedProcess
+from etl.config_validation.config import Config
+from etl.config_validation.db_settings import DSNSettings, ESSettings
+from etl.config_validation.indexes import FilmWork, Genre, Person
+from etl.logger import logger
+from etl.migration import UnifiedProcess
 
 config = Config.parse_file("config.json")
 
@@ -39,7 +39,7 @@ def migrate_to_etl():
             config=config.film_work_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='movies'
+            es_index_name="movies",
         )
         film_work_to_es.migrate()
 
@@ -47,7 +47,7 @@ def migrate_to_etl():
             config=config.person_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='persons'
+            es_index_name="persons",
         )
         person_to_es.migrate()
 
@@ -55,7 +55,7 @@ def migrate_to_etl():
             config=config.genre_pg,
             postgres_connection=connection,
             es_settings=es_settings,
-            es_index_name='genres'
+            es_index_name="genres",
         )
         genre_to_es.migrate()
 
@@ -67,4 +67,4 @@ if __name__ == "__main__":
             schedule.run_pending()
             sleep(1)
     except psycopg2.OperationalError:
-        logger.exception('Postgres connection operational error')
+        logger.exception("Postgres connection operational error")

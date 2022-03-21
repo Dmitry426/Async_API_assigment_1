@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+  async_service:
+    build:
+      context: .
+      target: production
+    environment:
+      - PORT_APP=3000
+      - WORKERS=2
+      - ASYNC_CORES=2000
+      - PROTOCOL=http
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - redis_server
+      - es01
+
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: es01
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+    volumes:
+      - data_es:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  redis_server:
+    image: 'redis:alpine'
+    volumes:
+      - data_redis:/data
+    env_file:
+      - ./.env
+    ports:
+      - "6379:6379"
+    restart: always
+
+  nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - async_server
+    ports:
+      - "80:80"
+
+
+volumes:
+  data_redis:
+    driver: "local"
+  data_es:
+    driver: "local"

@@ -44,7 +44,7 @@
       "id": {
         "type": "keyword"
       },
-      "name": {
+      "full_name": {
         "type": "text",
         "analyzer": "ru_en",
         "fields": {
@@ -52,8 +52,15 @@
             "type": "keyword"
           }
         }
+      },
+      "role": {
+        "type": "text",
+        "analyzer": "ru_en"
+      },
+      "film_works": {
+        "type": "text",
+        "analyzer": "ru_en"
       }
     }
   }
 }
-

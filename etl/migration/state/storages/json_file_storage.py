@@ -7,7 +7,7 @@ from .base_storage import BaseStorage
 
 
 class JsonFileStorage(BaseStorage):
-    default_file_name = 'state.json'
+    default_file_name = "state.json"
 
     def __init__(self, file_path: Optional[str] = None):
         self.file_path = file_path if file_path else self.default_file_name

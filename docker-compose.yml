@@ -1,22 +1,35 @@
 services:
   etl:
-    build: ./etl
+    build:
+      context: .
+      target: development
     env_file:
       - ./.env
+    command: [ "python", "-m", "etl"]
+    volumes:
+      - "./etl:/src/etl"
+      - "./etl/config.json:/src/config.json"
+
     links:
       - postgres
       - es01
 
   async_server:
-    build: ./async_service
-    command: python main.py
+    build:
+      context: .
+      target: development
+    image: async_server
+    ports:
+      - "127.0.0.1:8000:8000"
     env_file:
       - ./.env
+    command: [ "python", "-m", "async_service" ]
+    volumes:
+      - "./async_service:/src/async_service"
     depends_on:
       - es01
       - redis_server
-    expose:
-      - 8000
+
 
   postgres:
     image: postgres:13.0-alpine
@@ -41,7 +54,7 @@ services:
     volumes:
       - data_es:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - "9200:9200"
 
   redis_server:
     image: 'redis:alpine'
@@ -53,15 +66,6 @@ services:
       - "6379:6379"
     restart: always
 
-  nginx:
-    image: nginx:1.19.2
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/configs:/etc/nginx/conf.d:ro
-    depends_on:
-      - async_server
-    ports:
-      - "80:80"
 
 volumes:
   data_es:

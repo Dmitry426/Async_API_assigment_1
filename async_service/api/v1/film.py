@@ -2,12 +2,14 @@ from http import HTTPStatus
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi_cache.decorator import cache
 from pydantic import BaseModel
 from pydantic.validators import UUID
 
-from models.film import PersonGenreFilm
-from models.genre import Genre
-from services.film import FilmService, get_film_service
+from async_service.core.config import API_CACHE_TTL
+from async_service.models.film import PersonGenreFilm
+from async_service.models.genre import Genre
+from async_service.services.base_service import FilmService, get_film_service
 
 router = APIRouter()
 
@@ -15,7 +17,7 @@ router = APIRouter()
 class FilmList(BaseModel):
     id: UUID
     title: str
-    imdb_rating: Optional[float]
+    rating: float = None
 
 
 class FilmDetail(FilmList):
@@ -27,27 +29,39 @@ class FilmDetail(FilmList):
 
 
 @router.get(
-    "/search", response_model=List[FilmList], name="Films search",
+    "/search",
+    response_model=List[FilmList],
+    name="Films search",
     description="""
     Search through film titles by some arbitrary query.
     Returns paginated list of films sorted by search score.
-    """
-    )
+    """,
+)
+@cache(expire=API_CACHE_TTL)
 async def film_search(
-        query: str, film_service: FilmService = Depends(get_film_service),
-        page_size: int = Query(50, alias="page[size]"),
-        page_number: int = Query(1, alias="page[number]")
+    query: str,
+    film_service: FilmService = Depends(get_film_service),
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    sort: str = Query("rating"),
 ) -> List[FilmList]:
-    films = await film_service.get_list(page_size=page_size, page_number=page_number, query=query)
-    return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]
+    films = await film_service.get_list_search(
+        page_size=page_size, page_number=page_number, query=query, sort=sort
+    )
+    return [
+        FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films
+    ]
 
 
 @router.get(
-    "/{film_id}", response_model=FilmDetail, name="Film by ID",
-    description="Returns specific film by its UUID."
-    )
+    "/{film_id}",
+    response_model=FilmDetail,
+    name="Film by ID",
+    description="Returns specific film by its UUID.",
+)
+@cache(expire=API_CACHE_TTL)
 async def film_details(
-        film_id: UUID, film_service: FilmService = Depends(get_film_service)
+    film_id: UUID, film_service: FilmService = Depends(get_film_service)
 ) -> FilmDetail:
     film = await film_service.get_by_id(film_id)
     if not film:
@@ -57,14 +71,21 @@ async def film_details(
 
 
 @router.get(
-    "/", response_model=List[FilmList], name="Films list",
-    description="Returns paginated list of films sorted and filtered by corresponding params."
-    )
+    "/",
+    response_model=List[FilmList],
+    name="Films list",
+    description="Returns paginated list of films sorted and filtered by corresponding params.",
+)
+@cache(expire=API_CACHE_TTL)
 async def film_list(
-        film_service: FilmService = Depends(get_film_service),
-        sort: str = Query("-imdb_rating"), page_size: int = Query(50, alias="page[size]"),
-        page_number: int = Query(1, alias="page[number]"),
-        filter_genre: Optional[UUID] = Query(None, alias="filter[genre]")
+    film_service: FilmService = Depends(get_film_service),
+    sort: str = Query("rating"),
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
 ) -> List[FilmList]:
-    films = await film_service.get_list(page_size=page_size, page_number=page_number, sort=sort, genre_id=filter_genre)
-    return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]
+    films = await film_service.get_list_filter_by_id(
+        page_size=page_size, page_number=page_number, sort=sort, genre_id=filter_genre
+    )
+
+    return [FilmList(**film.dict(include={"id", "title", "rating"})) for film in films]
