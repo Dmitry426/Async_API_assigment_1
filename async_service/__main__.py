@@ -2,7 +2,8 @@ import logging
 import os
 
 import uvicorn
-from async_service import app, LOGGING
+from async_service import app
+from async_service.core.logger import LOGGING
 
 uvicorn.run(
         app,
