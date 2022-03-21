@@ -8,9 +8,12 @@ from pydantic.validators import UUID
 
 from async_service.core.config import API_CACHE_TTL
 from async_service.models.person import Person
-from async_service.services.base_service import (FilmService, PersonService,
-                                                 get_film_service,
-                                                 get_person_service)
+from async_service.services.base_service import (
+    FilmService,
+    PersonService,
+    get_film_service,
+    get_person_service,
+)
 
 from .film import FilmList
 
