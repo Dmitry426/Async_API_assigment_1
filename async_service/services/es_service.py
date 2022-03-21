@@ -42,7 +42,7 @@ class EsService(ABC):
     async def get_list_search(
             self, page_size: int, page_number: int,
             query: Optional[str] = None, sort: Optional[str] = None,
-    ) -> List[Person]:
+    ) -> List[BaseModel]:
         """Get from es search by query  """
 
         search = Search(using=self.elastic)
