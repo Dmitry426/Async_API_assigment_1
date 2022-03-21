@@ -41,9 +41,11 @@ class FilmDetail(FilmList):
 async def film_search(
         query: str, film_service: FilmService = Depends(get_film_service),
         page_size: int = Query(50, alias="page[size]"),
-        page_number: int = Query(1, alias="page[number]")
+        page_number: int = Query(1, alias="page[number]"),
+        sort: str = Query("rating")
+
 ) -> List[FilmList]:
-    films = await film_service.get_list_search(page_size=page_size, page_number=page_number, query=query)
+    films = await film_service.get_list_search(page_size=page_size, page_number=page_number, query=query,sort=sort)
     return [FilmList(**film.dict(include={"id", "title", "imdb_rating"})) for film in films]
 
 

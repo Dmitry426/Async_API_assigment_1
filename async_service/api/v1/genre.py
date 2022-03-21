@@ -1,11 +1,9 @@
 from http import HTTPStatus
 from typing import List
 
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_cache.decorator import cache
 from pydantic import BaseModel
-
 from pydantic.validators import UUID
 
 from async_service.core.config import API_CACHE_TTL
@@ -39,6 +37,7 @@ async def genre_list(genre_service: GenreService = Depends(get_genre_service)
                      , page_size: int = Query(50, alias="page[size]"),
                      page_number: int = Query(1, alias="page[number]")
                      ) -> List[Genre]:
-    genres = await genre_service.get_list_search(sort={"name.raw": "asc"}, page_number=page_number,
+    sort = {"name.raw": "asc"}
+    genres = await genre_service.get_list_search(sort=sort, page_number=page_number,
                                                  page_size=page_size)
     return genres

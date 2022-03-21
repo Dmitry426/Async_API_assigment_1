@@ -9,9 +9,9 @@ from pydantic import BaseModel
 from pydantic.validators import UUID
 
 from .film import FilmList
-from ...core.config import API_CACHE_TTL
-from ...models.person import Person
-from ...services.base_service import PersonService, get_person_service, FilmService, get_film_service
+from async_service.core.config import API_CACHE_TTL
+from async_service.models.person import Person
+from async_service.services.base_service import PersonService, get_person_service, FilmService, get_film_service
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ async def person_search(
         query: str, person_service: PersonService = Depends(get_person_service),
         page_size: int = Query(50, alias="page[size]"),
         page_number: int = Query(1, alias="page[number]")
-) -> List[Person]:
+) -> List[BaseModel]:
     persons = await person_service.get_list_search(page_size=page_size, page_number=page_number, query=query)
     if not persons:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="The is no such person ")
