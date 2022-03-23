@@ -19,6 +19,7 @@ class FilmWork(BaseModel):
     id: UUID
     rating: float = None
     genres: Optional[List[GenreFilmWork]]
+    role: str = None
     title: str = None
     description: str = None
     directors: Optional[List[PersonFilmWork]]
@@ -27,7 +28,7 @@ class FilmWork(BaseModel):
     actors: Optional[List[PersonFilmWork]]
     writers: Optional[List[PersonFilmWork]]
 
-    @validator("description", "title")
+    @validator("description", "title", "role")
     def handle_empty_str(cls, variable: str) -> str:
         return variable if variable else None
 
