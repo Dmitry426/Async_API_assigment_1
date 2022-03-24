@@ -1,12 +1,15 @@
 import asyncio
 import json
 import logging
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
 import aiofiles
 import aioredis
 import backoff
 import elasticsearch
+import jwt
+import pytest
 import pytest_asyncio
 from aiohttp import ClientSession
 from aioredis import Redis
@@ -54,14 +57,14 @@ async def load_json_data(file_path: str, index: str) -> Dict[str, Any]:
 
 
 async def load_test_data(
-    elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
+        elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
 ):
     result = await load_json_data(file_path=settings.data_path, index=index)
     await async_bulk(elastic_client, generate_data(index, result))
 
 
 async def create_es_index(
-    elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
+        elastic_client: AsyncElasticsearch, index: str, settings: TestSettings
 ):
     if not await elastic_client.indices.exists(index=index):
         result = await load_json_data(file_path=settings.index_path, index=index)
@@ -111,13 +114,13 @@ async def http_client_fixture(settings, redis_client, es_client) -> ClientSessio
     check they are ready to work.
     """
     async with ClientSession(
-        base_url=f"http://{settings.url_settings.host}:{settings.url_settings.port}"
+            base_url=f"http://{settings.url_settings.host}:{settings.url_settings.port}"
     ) as session:
         yield session
 
 
 async def wait_for_ping(
-    client: Union[Redis, AsyncElasticsearch], settings: TestSettings
+        client: Union[Redis, AsyncElasticsearch], settings: TestSettings
 ):
     """Wait for service client to answer"""
     client_name = type(client).__name__
@@ -140,9 +143,9 @@ def make_get_request(http_client: ClientSession):
     """Make HTTP-request"""
 
     async def inner(
-        url: str,
-        params: Optional[Dict[str, Any]] = None,
-        jwt: Optional[str] = None,
+            url: str,
+            params: Optional[Dict[str, Any]] = None,
+            jwt: Optional[str] = None,
     ) -> HTTPResponse:
         params = params or {}
         headers = {}
@@ -163,3 +166,18 @@ def make_get_request(http_client: ClientSession):
             )
 
     return inner
+
+
+@pytest.fixture(name="create_jwt_token", scope="function")
+def create_jwt_token(settings: TestSettings):
+        payload = {
+            'type': 'access',
+            'exp': datetime.utcnow() + timedelta(days=0, minutes=30),
+            'iat': datetime.utcnow(),
+            'sub': ["subscribed"]
+        }
+        return jwt.encode(
+            payload,
+            settings.jwt_settings.secret_key,
+            algorithm=settings.jwt_settings.algorithm
+        )
