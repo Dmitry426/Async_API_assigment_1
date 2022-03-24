@@ -48,6 +48,10 @@
       "rating": {
         "type": "float"
       },
+      "roles": {
+            "type": "text",
+            "analyzer": "ru_en"
+          },
       "genres": {
         "type": "nested",
         "dynamic": "strict",
