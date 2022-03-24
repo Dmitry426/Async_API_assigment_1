@@ -12,7 +12,7 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestFilm:
-    page_size = 50
+    page_size =42
     search_query: str = "star"
     genre_id: uuid = "55c723c1-6d90-4a04-a44b-e9792040251a"
     film_id: uuid = "ec0399e9-abcd-46b7-94d9-f1d8a6c515e9"
@@ -26,7 +26,7 @@ class TestFilm:
 
     async def test_film_query_with_params(self, make_get_request):
         response = await make_get_request(
-            url=PATH, params={"page[size]": self.page_size, "page[number]": 1}
+            url=PATH, params={"page[size]": self.page_size, "page[number]": 1},
         )
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)
@@ -39,7 +39,7 @@ class TestFilm:
         )
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)
-        assert len(response.body) == 50
+        assert len(response.body) == 42
         logger.info("Response length : %s", len(response.body))
 
     async def test_film_sort_success(self, make_get_request):
@@ -50,7 +50,7 @@ class TestFilm:
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)
         logger.debug("Response status : %s", response.status)
-        assert response.body[0]["rating"] == 9.2
+        assert response.body[0]["rating"] == 8.6
         logger.info("Response Imdb rating max : %s", response.body[0]["rating"])
 
     async def test_sort_by_genre_success(self, make_get_request):
@@ -64,7 +64,7 @@ class TestFilm:
         )
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)
-        assert len(response.body) == 6
+        assert len(response.body) == 2
         logger.info("Response length : %s", len(response.body))
 
     async def test_film_load_by_uuid(self, make_get_request):
@@ -107,7 +107,7 @@ class TestsFilmNegative:
         response = await make_get_request(url=PATH, params={"pagessdize": "sdaD"})
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)
-        assert len(response.body) == 50
+        assert len(response.body) == 42
         logger.info("Response length : %s", len(response.body))
 
     async def test_film_search_false_query(self, make_get_request):
