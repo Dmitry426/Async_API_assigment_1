@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -7,7 +6,7 @@ from fastapi_cache.backends.redis import RedisBackend
 
 from async_service.api.v1 import film, genre, person
 
-from .core.config import ProjectSettings, EsSettings
+from .core.config import EsSettings, ProjectSettings
 from .db import elastic, redis
 from .db.redis import get_redis
 
@@ -26,9 +25,7 @@ app = FastAPI(
 async def startup():
     FastAPICache.init(RedisBackend(get_redis()), prefix="fastapi-cache")
 
-    elastic.es = AsyncElasticsearch(
-        hosts=[f"{es_settings.host}:{es_settings.port}"]
-    )
+    elastic.es = AsyncElasticsearch(hosts=[f"{es_settings.host}:{es_settings.port}"])
 
 
 @app.on_event("shutdown")

@@ -7,16 +7,12 @@ from pydantic import BaseModel
 from pydantic.validators import UUID
 
 from async_service.core.config import RedisSettings
-
-from async_service.services.base_service import (
-    FilmService,
-    PersonService,
-    get_film_service,
-    get_person_service,
-)
+from async_service.serializers.person import Person
+from async_service.services.base_service import (FilmService, PersonService,
+                                                 get_film_service,
+                                                 get_person_service)
 
 from .film import FilmList
-from async_service.serializers.person import Person
 
 router = APIRouter()
 redis_settings = RedisSettings()

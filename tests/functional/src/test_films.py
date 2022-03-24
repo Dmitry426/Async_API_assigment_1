@@ -12,7 +12,7 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestFilm:
-    page_size =42
+    page_size = 42
     search_query: str = "star"
     genre_id: uuid = "55c723c1-6d90-4a04-a44b-e9792040251a"
     film_id: uuid = "ec0399e9-abcd-46b7-94d9-f1d8a6c515e9"
@@ -26,7 +26,8 @@ class TestFilm:
 
     async def test_film_query_with_params(self, make_get_request):
         response = await make_get_request(
-            url=PATH, params={"page[size]": self.page_size, "page[number]": 1},
+            url=PATH,
+            params={"page[size]": self.page_size, "page[number]": 1},
         )
         assert response.status == HTTPStatus.OK
         logger.debug("Response status : %s", response.status)

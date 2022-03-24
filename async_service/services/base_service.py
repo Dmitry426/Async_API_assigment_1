@@ -1,10 +1,8 @@
 from abc import ABC
 from functools import lru_cache
-from urllib.request import Request
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-
 
 from async_service.core.config import JwtSettings
 from async_service.db.elastic import get_elastic
@@ -24,7 +22,7 @@ class FilmService(EsService, ABC):
 
 @lru_cache
 def get_film_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(elastic)
 
@@ -36,7 +34,7 @@ class GenreService(EsService, ABC):
 
 @lru_cache
 def get_genre_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
     return GenreService(elastic)
 
@@ -48,7 +46,7 @@ class PersonService(EsService, ABC):
 
 @lru_cache
 def get_person_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
     return PersonService(elastic)
 
@@ -56,5 +54,3 @@ def get_person_service(
 class AuthService(Auth, ABC):
     secret_key = jwt.secret_key
     algorithm = jwt.algorithm
-
-

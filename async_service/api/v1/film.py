@@ -1,20 +1,16 @@
-import logging
 from http import HTTPStatus
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Header, Security
-from fastapi.security import HTTPBearer
+from fastapi import APIRouter, Depends, HTTPException, Query, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_cache.decorator import cache
-
 from pydantic.validators import UUID
 
-from async_service.core.config import RedisSettings, JwtSettings
+from async_service.core.config import JwtSettings, RedisSettings
 from async_service.serializers.auth import TokenData
-
-from async_service.serializers.film import FilmList, FilmDetail
-
-from async_service.services.base_service import FilmService, get_film_service, AuthService
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from async_service.serializers.film import FilmDetail, FilmList
+from async_service.services.base_service import (AuthService, FilmService,
+                                                 get_film_service)
 
 router = APIRouter()
 redis_settings = RedisSettings()
@@ -35,12 +31,12 @@ auth = AuthService()
 )
 @cache(expire=redis_settings.cache_ttl)
 async def film_search(
-        query: str,
-        film_service: FilmService = Depends(get_film_service),
-        page_size: int = Query(50, alias="page[size]"),
-        page_number: int = Query(1, alias="page[number]"),
-        sort: str = Query("rating"),
-        credentials: Optional[HTTPAuthorizationCredentials] = Security(security)
+    query: str,
+    film_service: FilmService = Depends(get_film_service),
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    sort: str = Query("rating"),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> List[FilmList]:
     token = credentials
     roles: TokenData
@@ -51,11 +47,13 @@ async def film_search(
         roles = TokenData(roles=["visitor"])
 
     films = await film_service.get_list_search(
-        page_size=page_size, page_number=page_number, query=query, sort=sort, roles=roles
+        page_size=page_size,
+        page_number=page_number,
+        query=query,
+        sort=sort,
+        roles=roles,
     )
-    return [
-        FilmList(**film.dict(include={"id", "title", "rating"})) for film in films
-    ]
+    return [FilmList(**film.dict(include={"id", "title", "rating"})) for film in films]
 
 
 @router.get(
@@ -66,7 +64,7 @@ async def film_search(
 )
 @cache(expire=redis_settings.cache_ttl)
 async def film_details(
-        film_id: UUID, film_service: FilmService = Depends(get_film_service)
+    film_id: UUID, film_service: FilmService = Depends(get_film_service)
 ) -> FilmDetail:
     film = await film_service.get_by_id(film_id)
     if not film:
@@ -83,12 +81,12 @@ async def film_details(
 )
 @cache(expire=redis_settings.cache_ttl)
 async def film_list(
-        film_service: FilmService = Depends(get_film_service),
-        sort: str = Query("rating"),
-        page_size: int = Query(50, alias="page[size]"),
-        page_number: int = Query(1, alias="page[number]"),
-        filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
-        credentials: Optional[HTTPAuthorizationCredentials] = Security(security)
+    film_service: FilmService = Depends(get_film_service),
+    sort: str = Query("rating"),
+    page_size: int = Query(50, alias="page[size]"),
+    page_number: int = Query(1, alias="page[number]"),
+    filter_genre: Optional[UUID] = Query(None, alias="filter[genre]"),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> List[FilmList]:
     token = credentials
     roles: TokenData
@@ -99,7 +97,11 @@ async def film_list(
         roles = TokenData(roles=["visitor"])
 
     films = await film_service.get_list_filter_by_id(
-        page_size=page_size, page_number=page_number, sort=sort, genre_id=filter_genre, roles=roles
+        page_size=page_size,
+        page_number=page_number,
+        sort=sort,
+        genre_id=filter_genre,
+        roles=roles,
     )
 
     return [FilmList(**film.dict(include={"id", "title", "rating"})) for film in films]

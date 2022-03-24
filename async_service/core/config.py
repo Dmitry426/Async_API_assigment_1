@@ -2,12 +2,10 @@ import os
 from logging import config as logging_config
 
 from dotenv import load_dotenv
-
-from async_service.core.logger import LOGGING
-
-
 from pydantic.env_settings import BaseSettings
 from pydantic.fields import Field
+
+from async_service.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 load_dotenv()
@@ -40,4 +38,3 @@ class JwtSettings(BaseSettings):
 class ProjectSettings(BaseSettings):
     base_dir: str = Field(os.path.dirname(os.path.abspath(__file__)))
     project_name: str = Field("movies", env="PROJECT_NAME")
-

@@ -7,7 +7,7 @@ from pydantic.validators import UUID
 class PersonGenreFilm(BaseModel):
     id: UUID
     name: str
-    
+
 
 class Person(BaseModel):
     id: UUID

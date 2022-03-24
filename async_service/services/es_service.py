@@ -41,18 +41,18 @@ class EsService(ABC):
         return self.response_model(**doc["_source"])
 
     async def get_list_search(
-            self,
-            page_size: int,
-            page_number: int,
-            query: Optional[str] = None,
-            sort: Optional[str] = None,
-            roles: TokenData = None
+        self,
+        page_size: int,
+        page_number: int,
+        query: Optional[str] = None,
+        sort: Optional[str] = None,
+        roles: TokenData = None,
     ) -> List[BaseModel]:
         """Get from es search by query"""
 
         search = Search(using=self.elastic)
         if roles:
-            search = search.filter('term', roles=roles.roles[0])
+            search = search.filter("term", roles=roles.roles[0])
 
         if query:
             search = self._search_by_query(search=search, query=query)
@@ -70,13 +70,13 @@ class EsService(ABC):
         return result
 
     async def get_list_filter_by_id(
-            self,
-            page_size: int,
-            page_number: int,
-            sort: str = None,
-            genre_id: Optional[UUID] = None,
-            person_id: Optional[UUID] = None,
-            roles: TokenData = None
+        self,
+        page_size: int,
+        page_number: int,
+        sort: str = None,
+        genre_id: Optional[UUID] = None,
+        person_id: Optional[UUID] = None,
+        roles: TokenData = None,
     ) -> List[BaseModel]:
         """Get from es search filter by uuid and sort"""
 
@@ -86,7 +86,7 @@ class EsService(ABC):
                 "nested", path="genres", query=Q("term", genres__id=genre_id)
             )
         if roles:
-            search = search.filter('term', roles=roles.roles[0])
+            search = search.filter("term", roles=roles.roles[0])
 
         if person_id:
             search = search.query(

@@ -23,10 +23,10 @@ class UvicornURL(BaseSettings):
 class JwtSettings(BaseSettings):
     secret_key: str = Field("super-secret-key", env="JWT_SECRET_KEY")
     algorithm: str = Field("HS256", env="ALGORITHM")
-  
+
 
 class TestSettings(BaseSettings):
-    jwt_settings : JwtSettings = JwtSettings()
+    jwt_settings: JwtSettings = JwtSettings()
     es_settings: EsSettings = EsSettings()
     redis_settings: RedisSettings = RedisSettings()
     url_settings: UvicornURL = UvicornURL()
