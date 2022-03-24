@@ -7,14 +7,15 @@ from fastapi_cache.backends.redis import RedisBackend
 
 from async_service.api.v1 import film, genre, person
 
-from .core import config
+from .core.config import ProjectSettings, EsSettings
 from .db import elastic, redis
 from .db.redis import get_redis
 
-load_dotenv()
+base_settings = ProjectSettings()
+es_settings = EsSettings()
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
+    title=base_settings.project_name,
     docs_url="/api/openapi",
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
@@ -26,7 +27,7 @@ async def startup():
     FastAPICache.init(RedisBackend(get_redis()), prefix="fastapi-cache")
 
     elastic.es = AsyncElasticsearch(
-        hosts=[f"{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
+        hosts=[f"{es_settings.host}:{es_settings.port}"]
     )
 
 
