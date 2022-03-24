@@ -6,8 +6,8 @@ from fastapi_cache.decorator import cache
 from pydantic import BaseModel
 from pydantic.validators import UUID
 
-from async_service.core.config import API_CACHE_TTL
-from async_service.models.person import Person
+from async_service.core.config import RedisSettings
+
 from async_service.services.base_service import (
     FilmService,
     PersonService,
@@ -16,8 +16,10 @@ from async_service.services.base_service import (
 )
 
 from .film import FilmList
+from async_service.serializers.person import Person
 
 router = APIRouter()
+redis_settings = RedisSettings()
 
 
 @router.get(
@@ -29,7 +31,7 @@ router = APIRouter()
     Returns paginated list of persons sorted by search score.
     """,
 )
-@cache(expire=API_CACHE_TTL)
+@cache(expire=redis_settings.cache_ttl)
 async def person_search(
     query: str,
     person_service: PersonService = Depends(get_person_service),
@@ -52,7 +54,7 @@ async def person_search(
     name="Person by ID",
     description="Returns specific person by its UUID.",
 )
-@cache(expire=API_CACHE_TTL)
+@cache(expire=redis_settings.cache_ttl)
 async def person_details(
     person_id: UUID, person_service: PersonService = Depends(get_person_service)
 ) -> BaseModel:
@@ -71,7 +73,7 @@ async def person_details(
     name="Get films by person ID",
     description="Returns list films in which person took any part.",
 )
-@cache(expire=API_CACHE_TTL)
+@cache(expire=redis_settings.cache_ttl)
 async def person_list(
     person_id: UUID,
     film_service: FilmService = Depends(get_film_service),
