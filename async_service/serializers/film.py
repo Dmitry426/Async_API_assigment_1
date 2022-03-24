@@ -11,7 +11,7 @@ class FilmList(BaseModel):
     id: UUID
     title: str
     rating: float = None
-    role: Optional[str] = None
+    roles: Optional[str] = None
 
 
 class FilmDetail(FilmList):
