@@ -1,3 +1,8 @@
+## Flask JWT sprint project link 
+This project Jwt implementation linked to another sprint project 
+
+https://github.com/Olegt0rr/Auth_sprint_1.git
+
 ## FastAPI project async .
 
 - As for now project can run from the container,
