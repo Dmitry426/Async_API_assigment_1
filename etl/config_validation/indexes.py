@@ -19,6 +19,7 @@ class FilmWork(BaseModel):
     id: UUID
     rating: float = None
     genres: Optional[List[GenreFilmWork]]
+    roles: List[str] = None
     title: str = None
     description: str = None
     directors: Optional[List[PersonFilmWork]]

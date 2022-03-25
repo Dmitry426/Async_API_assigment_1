@@ -16,6 +16,7 @@ class Film(JsonConfig):
     rating: float = None
     genres: Optional[List[PersonGenreFilm]]
     title: str = None
+    roles: Optional[str] = None
     description: str = None
     directors: Optional[List[PersonGenreFilm]]
     actors_names: Optional[List[str]]

@@ -4,15 +4,16 @@ from typing import Optional
 import aioredis
 from aioredis import Redis
 
-from async_service.core import config
+from ..core.config import RedisSettings
 
+redis_settings = RedisSettings()
 redis: Optional[Redis] = None
 
 
 @lru_cache
 def get_redis() -> Redis:
     return aioredis.from_url(
-        f"redis://{config.REDIS_HOST}:{config.REDIS_PORT}/{config.REDIS_DB}",
+        f"redis://{redis_settings.host}:{redis_settings.port}/{redis_settings.db}",
         encoding="utf8",
         decode_responses=True,
     )

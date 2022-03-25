@@ -2,6 +2,8 @@ import os
 from logging import config as logging_config
 
 from dotenv import load_dotenv
+from pydantic.env_settings import BaseSettings
+from pydantic.fields import Field
 
 from async_service.core.logger import LOGGING
 
@@ -10,15 +12,29 @@ load_dotenv()
 
 logging_config.dictConfig(LOGGING)
 
-PROJECT_NAME = os.getenv("PROJECT_NAME", "movies")
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT"))
+class EsSettings(BaseSettings):
+    host: str = Field("127.0.0.1", env="ELASTIC_HOST")
+    port: str = Field("5432", env="ELASTIC_PORT")
 
-ELASTIC_HOST = os.getenv("ELASTIC_HOST", "localhost")
-ELASTIC_PORT = int(os.getenv("ELASTIC_PORT"))
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+class RedisSettings(BaseSettings):
+    host: str = Field("127.0.0.1", env="REDIS_HOST")
+    port: str = Field("6379", env="REDIS_PORT")
+    db: int = Field(0, env="REDIS_DB")
+    cache_ttl = Field(3600, env="API_CACHE_TTL")
 
-API_CACHE_TTL = int(os.getenv("API_CACHE_TTL", 3600))
-REDIS_DB = int(os.getenv("REDIS_DB", 0))
+
+class UvicornURL(BaseSettings):
+    host: str = Field("127.0.0.1", env="UVICORN_HOST")
+    port: str = Field("8000", env="UVICORN_PORT")
+
+
+class JwtSettings(BaseSettings):
+    secret_key: str = Field("super-secret-key", env="JWT_SECRET_KEY")
+    algorithm: str = Field("HS256", env="ALGORITHM")
+
+
+class ProjectSettings(BaseSettings):
+    base_dir: str = Field(os.path.dirname(os.path.abspath(__file__)))
+    project_name: str = Field("movies", env="PROJECT_NAME")

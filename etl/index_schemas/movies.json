@@ -74,6 +74,10 @@
         "type": "text",
         "analyzer": "ru_en"
       },
+      "roles": {
+            "type": "text",
+            "analyzer": "ru_en"
+          },
       "directors": {
         "type": "nested",
         "dynamic": "strict",
