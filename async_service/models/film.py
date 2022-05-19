@@ -13,11 +13,11 @@ class PersonGenreFilm(BaseModel):
 
 class Film(JsonConfig):
     id: UUID
-    rating: float = None
+    rating: Optional[float]
     genres: Optional[List[PersonGenreFilm]]
-    title: str = None
-    roles: Optional[str] = None
-    description: str = None
+    title: Optional[str]
+    roles: Optional[str]
+    description: Optional[str]
     directors: Optional[List[PersonGenreFilm]]
     actors_names: Optional[List[str]]
     writers_names: Optional[List[str]]
