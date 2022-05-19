@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Dict, List, Optional
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch
@@ -9,14 +9,12 @@ from elasticsearch_dsl import Q, Search
 from pydantic import BaseModel
 
 from async_service.serializers.auth import TokenData
+from async_service.serializers.genre import Genre
 
 logger = logging.getLogger(__name__)
 
 
 class EsService(ABC):
-    elastic_index_name: str
-    response_model: BaseModel
-
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
@@ -27,13 +25,13 @@ class EsService(ABC):
 
     @property
     @abstractmethod
-    def response_model(self):
+    def response_model(self) -> BaseModel:
         pass
 
     async def get_by_id(self, obj_id: UUID) -> Optional[BaseModel]:
         """Get from es by id"""
         try:
-            doc = await self.elastic.get(index=self.elastic_index_name, id=obj_id)
+            doc = await self.elastic.get(index=self.elastic_index_name, id=str(obj_id))
 
         except NotFoundError:
             logger.debug("Obj %s is not found", obj_id)
@@ -44,15 +42,15 @@ class EsService(ABC):
         self,
         page_size: int,
         page_number: int,
-        query: Optional[str] = None,
+        query: Dict[str, str] = None,
         sort: Optional[str] = None,
         roles: TokenData = None,
-    ) -> List[BaseModel]:
+    ) -> List[Genre]:
         """Get from es search by query"""
 
         search = Search(using=self.elastic)
         if roles:
-            search = search.filter("term", roles=roles.roles[0])
+            search = search.filter("term", roles=roles.roles[-1])
 
         if query:
             search = self._search_by_query(search=search, query=query)

@@ -10,8 +10,8 @@ from async_service.serializers.genre import Genre
 class FilmList(BaseModel):
     id: UUID
     title: str
-    rating: float = None
-    roles: Optional[str] = None
+    rating: Optional[float]
+    roles: Optional[str]
 
 
 class FilmDetail(FilmList):

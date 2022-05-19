@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from http.client import HTTPException
 from typing import Optional
 
 import jwt
@@ -7,9 +6,6 @@ from fastapi import HTTPException
 
 
 class Auth:
-    secret_key: str
-    algorithm: str
-
     @property
     @abstractmethod
     def secret_key(self) -> str:
