@@ -1,58 +1,59 @@
-name: AuthAPI - Style check
+name: YandexPracticum CI
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - async_service/**
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
-    paths:
-      - async_service/**
-  workflow_dispatch:
-
-env:
-  SRC_PATH: async_service/
-  DEPLOY_PATH: async_service/
+    branches: [ main ]
 
 jobs:
-  style-checking:
+  build:
+
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ${{ env.SRC_PATH }}
-
     strategy:
+      max-parallel: 3
       matrix:
-        python-version:
-          - '3.9'
+        python-version: 3.9
 
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install flake8 mypy
-        working-directory:
-          ${{ env.DEPLOY_PATH }}
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
 
-      - name: Error checking (stop the build if there are Python syntax errors or undefined names)
-        run: flake8 . --select=E9,F63,F7,F82
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
 
-      - name: REPORT - Style checking
-        run: flake8 . --exit-zero
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest wemake-python-styleguide mypy lxml flake8-html
+        poetry install
 
-      - name: REPORT - Type checking
-        run: mypy --install-types --non-interactive --ignore-missing-imports . || true
+    - name: Create directories
+      run: |
+        mkdir -p reports/async_service/wemake-python-styleguide/
+        mkdir -p reports/etl/wemake-python-styleguide/
+        mkdir -p reports/async_service/mypy/
+        mkdir -p reports/etl/mypy/
+
+    - name: Lint with wemake-python-styleguide
+      run: |
+        flake8 async_service --exit-zero --format=html --htmldir=reports/async_service/wemake-python-styleguide/
+        flake8 etl --exit-zero --format=html --htmldir=reports/etl/wemake-python-styleguide/
+
+    - name: Check typing with mypy
+      run: |
+        mypy --html-report reports/async_service/mypy/ ./async_service || true
+        mypy --html-report reports/etl/mypy/ ./etl || true
+
+    - name: Upload reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: html_reports
+        path: reports/
