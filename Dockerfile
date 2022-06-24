@@ -58,11 +58,18 @@ WORKDIR $PYSETUP_PATH
 COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 
+
 # quicker install as runtime deps are already installed
 RUN poetry install
+# netcat for testing
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y netcat
+
 
 # WARNING! Don't forget to mount "./app:/src/app"
 WORKDIR /src
+RUN mkdir /src/logs
+
 
 EXPOSE $PORT_APP
 
@@ -72,12 +79,11 @@ EXPOSE $PORT_APP
 FROM python-base as production
 ENV FASTAPI_ENV=production
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-COPY gevent_runner.py .
-COPY app ./app
-CMD uwsgi --master \
-  --single-interpreter \
-  --workers $WORKERS \
-  --gevent $ASYNC_CORES \
-  --protocol $PROTOCOL \
-  --socket 0.0.0.0:$PORT_APP \
-  --module gevent_runner:application
+COPY async_service ./async_service
+COPY async_runner.py .
+CMD uvicorn \
+   async_runner:app \
+  --proxy-headers \
+  --host  $HOST_APP \
+  --port $PORT_APP \
+  --workers $WORKERS\
