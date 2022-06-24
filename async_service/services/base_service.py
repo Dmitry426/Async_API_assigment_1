@@ -53,4 +53,4 @@ def get_person_service(
 
 class AuthService(Auth, ABC):
     secret_key = jwt.secret_key
-    algorithm = jwt.algorithm
+    algorithm = [jwt.algorithm]

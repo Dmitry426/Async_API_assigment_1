@@ -16,7 +16,7 @@ class Auth:
 
     @property
     @abstractmethod
-    def algorithm(self) -> List[str] or str:
+    def algorithm(self) -> List[str]:
         pass
 
     def decode_token(self, token: str):
