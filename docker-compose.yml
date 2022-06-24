@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   etl:
     build:
@@ -9,10 +11,11 @@ services:
     volumes:
       - "./etl:/src/etl"
       - "./etl/config.json:/src/config.json"
-
-    links:
-      - postgres
-      - es01
+    depends_on:
+      elastic:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   async_server:
     build:
@@ -20,50 +23,67 @@ services:
       target: development
     image: async_server
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"
     env_file:
       - ./.env
     command: [ "python", "-m", "async_service" ]
     volumes:
       - "./async_service:/src/async_service"
     depends_on:
-      - es01
-      - redis_server
-
+      elastic:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:13.0-alpine
     volumes:
       - data_postgres:/var/lib/postgresql/data/
-    env_file:
-      - ./.env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DBNAME}
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DBNAME}
+      interval: 5s
+      timeout: 20s
+      retries: 100
     ports:
       - "5432:5432"
     restart: always
 
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
-    container_name: es01
+  elastic:
+    image: elasticsearch:7.7.0
     environment:
-      - node.name=es01
-      - discovery.type=single-node
+      cluster.name: movies-elasticsearch-cluster
+      network.host: 0.0.0.0
+      bootstrap.memory_lock: "true"
+      discovery.type: single-node
+    healthcheck:
+      test: curl -s http://elastic:9200/_cat/health >/dev/null || exit 1
+      interval: 5s
+      timeout: 20s
+      retries: 100
     volumes:
       - data_es:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
 
-  redis_server:
-    image: 'redis:alpine'
+  redis:
+    image: redis:6-alpine
     volumes:
       - data_redis:/data
-    env_file:
-      - ./.env
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 20s
+      retries: 2
     restart: always
 
 
