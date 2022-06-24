@@ -1,9 +1,9 @@
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel
-from pydantic.validators import UUID
 
-from .base import JsonConfig
+from .base import BaseOrjson
 
 
 class PersonGenreFilm(BaseModel):
@@ -11,8 +11,7 @@ class PersonGenreFilm(BaseModel):
     name: str
 
 
-class Film(JsonConfig):
-    id: UUID
+class Film(BaseOrjson):
     rating: Optional[float]
     genres: Optional[List[PersonGenreFilm]]
     title: Optional[str]

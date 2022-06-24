@@ -1,12 +1,10 @@
 from typing import List
+from uuid import UUID
 
-from pydantic.validators import UUID
-
-from .base import JsonConfig
+from .base import BaseOrjson
 
 
-class Person(JsonConfig):
-    id: UUID
+class Person(BaseOrjson):
     full_name: str
     role: List[str]
     film_works: List[UUID]

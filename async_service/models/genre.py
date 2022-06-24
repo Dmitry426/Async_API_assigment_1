@@ -1,8 +1,5 @@
-from pydantic.validators import UUID
-
-from .base import JsonConfig
+from .base import BaseOrjson
 
 
-class Genre(JsonConfig):
-    id: UUID
+class Genre(BaseOrjson):
     name: str

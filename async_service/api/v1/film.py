@@ -1,10 +1,10 @@
 from http import HTTPStatus
 from typing import List, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_cache.decorator import cache
-from pydantic.validators import UUID
 
 from async_service.core.config import JwtSettings, RedisSettings
 from async_service.serializers.auth import TokenData
@@ -42,7 +42,7 @@ async def film_search(
     credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> List[FilmList]:
     token = credentials
-    roles: TokenData
+    roles: Optional[TokenData] = None
     if token:
         result = auth.decode_token(token=token.credentials)
         roles = TokenData(roles=result["roles"])
@@ -80,8 +80,8 @@ async def film_details(
     "/",
     response_model=List[FilmList],
     name="Films list",
-    description="""Returns paginated list of films sorted 
-    and filtered by corresponding params.""",
+    description="""Returns paginated list of films sorted and filtered by
+    corresponding params.""",
 )
 @cache(expire=redis_settings.cache_ttl)
 async def film_list(
@@ -93,7 +93,7 @@ async def film_list(
     credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> List[FilmList]:
     token = credentials
-    roles: TokenData
+    roles: Optional[TokenData] = None
     if token:
         result = auth.decode_token(token=token.credentials)
         roles = TokenData(roles=result["roles"])

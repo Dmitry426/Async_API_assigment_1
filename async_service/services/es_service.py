@@ -1,17 +1,16 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Q, Search
-from pydantic import BaseModel
 
 from async_service.serializers.auth import TokenData
-from async_service.serializers.genre import Genre
+from async_service.serializers.base import UuidModel
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('film_api')
 
 
 class EsService(ABC):
@@ -25,10 +24,10 @@ class EsService(ABC):
 
     @property
     @abstractmethod
-    def response_model(self) -> BaseModel:
+    def response_model(self) -> Type[UuidModel]:
         pass
 
-    async def get_by_id(self, obj_id: UUID) -> Optional[BaseModel]:
+    async def get_by_id(self, obj_id: UUID) -> Optional[UuidModel]:
         """Get from es by id"""
         try:
             doc = await self.elastic.get(index=self.elastic_index_name, id=str(obj_id))
@@ -42,10 +41,10 @@ class EsService(ABC):
         self,
         page_size: int,
         page_number: int,
-        query: Dict[str, str] = None,
-        sort: Optional[str] = None,
+        query: Optional[str] = None,
+        sort: Dict[str, str] = None,
         roles: TokenData = None,
-    ) -> List[Genre]:
+    ) -> List[UuidModel]:
         """Get from es search by query"""
 
         search = Search(using=self.elastic)
@@ -75,7 +74,7 @@ class EsService(ABC):
         genre_id: Optional[UUID] = None,
         person_id: Optional[UUID] = None,
         roles: TokenData = None,
-    ) -> List[BaseModel]:
+    ) -> List[UuidModel]:
         """Get from es search filter by uuid and sort"""
 
         search = Search(using=self.elastic)
@@ -117,19 +116,16 @@ class EsService(ABC):
         search = search[start:end]
         body = search.to_dict()
         data = await self.elastic.search(index=self.elastic_index_name, body=body)
-        result = [self.response_model(**hit["_source"]) for hit in data["hits"]["hits"]]
 
-        return result
+        return [self.response_model(**hit["_source"]) for hit in data["hits"]["hits"]]
 
-    def _search_by_query(self, search: Search, query: str):
+    def _search_by_query(self, search: Search, query: str) -> Type[UuidModel]:
         """Method to separate search queries by index"""
 
         if self.elastic_index_name == "movies":
             search = search.query(
                 Q("match", title={"query": query, "fuzziness": "auto"})
             )
-
-            return search
 
         if self.elastic_index_name == "persons":
             search = search.query(
@@ -141,4 +137,4 @@ class EsService(ABC):
                 )
             )
 
-            return search
+        return search

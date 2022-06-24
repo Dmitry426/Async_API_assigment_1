@@ -5,7 +5,7 @@ from typing import Iterable, List
 from .es_upload import UploadBatch
 from .state import JsonFileStorage, State
 
-logger = getLogger(__name__)
+logger = getLogger("postgres_to_es")
 
 
 class UnifiedProcess:

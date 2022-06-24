@@ -1,14 +1,12 @@
 from typing import List, Optional
-from uuid import UUID
-
-from pydantic import BaseModel
 
 from async_service.models.film import PersonGenreFilm
 from async_service.serializers.genre import Genre
 
+from .base import UuidModel
 
-class FilmList(BaseModel):
-    id: UUID
+
+class FilmList(UuidModel):
     title: str
     rating: Optional[float]
     roles: Optional[str]

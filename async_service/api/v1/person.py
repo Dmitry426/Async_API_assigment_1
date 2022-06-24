@@ -1,12 +1,13 @@
 from http import HTTPStatus
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_cache.decorator import cache
-from pydantic import BaseModel
-from pydantic.validators import UUID
 
 from async_service.core.config import RedisSettings
+from async_service.serializers.base import UuidModel
+from async_service.serializers.film import FilmList
 from async_service.serializers.person import Person
 from async_service.services.base_service import (
     FilmService,
@@ -14,8 +15,6 @@ from async_service.services.base_service import (
     get_film_service,
     get_person_service,
 )
-
-from .film import FilmList
 
 router = APIRouter()
 redis_settings = RedisSettings()
@@ -36,7 +35,7 @@ async def person_search(
     person_service: PersonService = Depends(get_person_service),
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
-) -> List[BaseModel]:
+) -> List[UuidModel]:
     persons = await person_service.get_list_search(
         page_size=page_size, page_number=page_number, query=query
     )
@@ -56,7 +55,7 @@ async def person_search(
 @cache(expire=redis_settings.cache_ttl)
 async def person_details(
     person_id: UUID, person_service: PersonService = Depends(get_person_service)
-) -> BaseModel:
+) -> UuidModel:
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(
