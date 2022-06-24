@@ -1,57 +1,72 @@
-LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_DEFAULT_HANDLERS = [
-    "console",
-]
+import os
+
+log_path_app = os.path.join("/", "src/logs/film_api.json")
+log_path_uvicorn = os.path.join("/", "src/logs/uvicorn.json")
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {"format": LOG_FORMAT},
-        "default": {
+        "json": {
+            "()": "ecs_logging.StdlibFormatter",
+        },
+        "uvicorn-default": {
             "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": "%(levelprefix)s %(message)s",
             "use_colors": None,
         },
-        "access": {
+        "uvicorn-access": {
             "()": "uvicorn.logging.AccessFormatter",
-            "fmt": "%(levelprefix)s %(client_addr)s - '%(request_line)s' %(status_code)s",
+            "use_colors": None,
         },
     },
     "handlers": {
+        "film_api_handler": {
+            "level": "INFO",
+            "formatter": "json",
+            "class": "logging.FileHandler",
+            "filename": log_path_app,
+        },
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
         },
-        "default": {
-            "formatter": "default",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",
+        "uvicorn-default": {
+            "level": "INFO",
+            "formatter": "json",
+            "class": "logging.FileHandler",
+            "filename": log_path_uvicorn,
         },
-        "access": {
-            "formatter": "access",
+        "uvicorn-access": {
+            "formatter": "uvicorn-access",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
         },
     },
     "loggers": {
         "": {
-            "handlers": LOG_DEFAULT_HANDLERS,
+            "handlers": ["console"],
             "level": "INFO",
+        },
+        "film_api": {
+            "handlers": ["film_api_handler"],
+            "level": "INFO",
+            "propagate": False,
         },
         "uvicorn.error": {
+            "handlers": ["uvicorn-default"],
             "level": "INFO",
+            "propagate": False,
         },
         "uvicorn.access": {
-            "handlers": ["access"],
+            "handlers": ["uvicorn-access"],
             "level": "INFO",
             "propagate": False,
         },
     },
     "root": {
         "level": "INFO",
-        "formatter": "verbose",
-        "handlers": LOG_DEFAULT_HANDLERS,
+        "handlers": [
+            "console",
+        ],
     },
 }
