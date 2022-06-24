@@ -1,16 +1,17 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Iterable, List
+from typing import Iterable, List, Dict, Set, Optional, Type, Any
 
 from .es_upload import UploadBatch
 from .state import JsonFileStorage, State
+from ..config_validation.indexes import UIIDModel
 
 logger = getLogger("postgres_to_es")
 
 
 class UnifiedProcess:
-    validation_model = None
-    _local_state = {}
+    validation_model: Type[UIIDModel]
+    _local_state: Dict[str, Any] = {}
 
     def __init__(
         self, config, postgres_connection, es_settings: dict, es_index_name: str
@@ -49,7 +50,7 @@ class UnifiedProcess:
             yield count
             count += step
 
-    def enrich_data(self, item_ids: Iterable) -> dict:
+    def enrich_data(self, item_ids: Iterable) -> Iterable:
         if not item_ids:
             return
 
@@ -84,7 +85,7 @@ class UnifiedProcess:
 
     def _get_updated_item_ids(self, producer_data: List) -> set:
         with self.conn_postgres.cursor() as cursor:
-            items = set()
+            items: Set[str] = set()
             for data in producer_data:
                 query_tail = self._handle_no_date(data)
                 query = " ".join([data.query, query_tail])

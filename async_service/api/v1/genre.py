@@ -29,7 +29,7 @@ async def genre_details(
     if not genre:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genre not found")
 
-    return genre
+    return Genre(**genre.dict())
 
 
 @router.get(
@@ -44,8 +44,9 @@ async def genre_list(
     page_size: int = Query(50, alias="page[size]"),
     page_number: int = Query(1, alias="page[number]"),
 ) -> List[UuidModel]:
-    sort = {"name.raw": "asc"}
     genres = await genre_service.get_list_search(
-        sort=sort, page_number=page_number, page_size=page_size
+        page_number=page_number, page_size=page_size
     )
-    return genres
+    return [
+        Genre(**genre.dict()) for genre in genres
+    ]

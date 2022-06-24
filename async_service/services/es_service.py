@@ -1,14 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Type
+from typing import List, Optional, Type
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Q, Search
 
+from async_service.models.base import BaseOrjson
 from async_service.serializers.auth import TokenData
-from async_service.serializers.base import UuidModel
 
 logger = logging.getLogger('film_api')
 
@@ -24,10 +24,10 @@ class EsService(ABC):
 
     @property
     @abstractmethod
-    def response_model(self) -> Type[UuidModel]:
+    def response_model(self) -> Type[BaseOrjson]:
         pass
 
-    async def get_by_id(self, obj_id: UUID) -> Optional[UuidModel]:
+    async def get_by_id(self, obj_id: UUID) -> Optional[BaseOrjson]:
         """Get from es by id"""
         try:
             doc = await self.elastic.get(index=self.elastic_index_name, id=str(obj_id))
@@ -42,9 +42,9 @@ class EsService(ABC):
         page_size: int,
         page_number: int,
         query: Optional[str] = None,
-        sort: Dict[str, str] = None,
+        sort: str = None,
         roles: TokenData = None,
-    ) -> List[UuidModel]:
+    ) -> List[BaseOrjson]:
         """Get from es search by query"""
 
         search = Search(using=self.elastic)
@@ -74,7 +74,7 @@ class EsService(ABC):
         genre_id: Optional[UUID] = None,
         person_id: Optional[UUID] = None,
         roles: TokenData = None,
-    ) -> List[UuidModel]:
+    ) -> List[BaseOrjson]:
         """Get from es search filter by uuid and sort"""
 
         search = Search(using=self.elastic)
@@ -119,7 +119,7 @@ class EsService(ABC):
 
         return [self.response_model(**hit["_source"]) for hit in data["hits"]["hits"]]
 
-    def _search_by_query(self, search: Search, query: str) -> Type[UuidModel]:
+    def _search_by_query(self, search: Search, query: str) -> Type[BaseOrjson]:
         """Method to separate search queries by index"""
 
         if self.elastic_index_name == "movies":

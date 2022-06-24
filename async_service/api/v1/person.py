@@ -43,7 +43,10 @@ async def person_search(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="The is no such person "
         )
-    return persons
+    return [
+        Person(**person.dict())for person in persons
+    ]
+
 
 
 @router.get(
@@ -62,7 +65,7 @@ async def person_details(
             status_code=HTTPStatus.NOT_FOUND, detail="The is no such person "
         )
 
-    return person
+    return Person(**dict(person))
 
 
 @router.get(

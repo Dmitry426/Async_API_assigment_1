@@ -5,23 +5,24 @@ from pydantic import BaseModel
 from pydantic.class_validators import validator
 
 
-class PersonFilmWork(BaseModel):
+class UIIDModel(BaseModel):
     id: UUID
+
+
+class PersonFilmWork(UIIDModel):
     name: str
 
 
-class GenreFilmWork(BaseModel):
-    id: UUID
+class GenreFilmWork(UIIDModel):
     name: str
 
 
-class FilmWork(BaseModel):
-    id: UUID
-    rating: float = None
+class FilmWork(UIIDModel):
+    rating: float
     genres: Optional[List[GenreFilmWork]]
-    roles: List[str] = None
-    title: str = None
-    description: str = None
+    roles: Optional[List[str]] = None
+    title: str
+    description: str
     directors: Optional[List[PersonFilmWork]]
     actors_names: Optional[List[str]]
     writers_names: Optional[List[str]]
@@ -29,21 +30,19 @@ class FilmWork(BaseModel):
     writers: Optional[List[PersonFilmWork]]
 
     @validator("description", "title")
-    def handle_empty_str(cls, variable: str) -> str:
+    def handle_empty_str(cls, variable: str) -> Optional[str]:
         return variable if variable else None
 
     @validator("rating")
-    def handle_empty_float(cls, variable: float) -> float:
+    def handle_empty_float(cls, variable: float) -> Optional[float]:
         return variable if variable else None
 
 
-class Person(BaseModel):
-    id: UUID
+class Person(UIIDModel):
     full_name: str
     role: List[str]
     film_works: List[UUID]
 
 
-class Genre(BaseModel):
-    id: UUID
+class Genre(UIIDModel):
     name: str
