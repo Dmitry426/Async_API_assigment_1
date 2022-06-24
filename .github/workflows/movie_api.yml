@@ -1,0 +1,58 @@
+name: AuthAPI - Style check
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - async_service/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - async_service/**
+  workflow_dispatch:
+
+env:
+  SRC_PATH: async_service/
+  DEPLOY_PATH: async_service/
+
+jobs:
+  style-checking:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.SRC_PATH }}
+
+    strategy:
+      matrix:
+        python-version:
+          - '3.9'
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install flake8 mypy
+        working-directory:
+          ${{ env.DEPLOY_PATH }}
+
+      - name: Error checking (stop the build if there are Python syntax errors or undefined names)
+        run: flake8 . --select=E9,F63,F7,F82
+
+      - name: REPORT - Style checking
+        run: flake8 . --exit-zero
+
+      - name: REPORT - Type checking
+        run: mypy --install-types --non-interactive --ignore-missing-imports . || true
