@@ -18,21 +18,12 @@ backoff = "^1.11.1"
 aiohttp = "^3.8.1"
 redis = "^4.1.4"
 PyJWT = "^2.3.0"
-mypy = "^0.950"
-flake8 = "^4.0.1"
-
+ecs-logging = "^2.0.0"
+pylint = "^2.14.3"
 
 
 [tool.poetry.dev-dependencies]
-elasticsearch = "^7.17.1"
-fastapi = "^0.75.0"
 aioredis = "^2.0.1"
-orjson = "^3.6.7"
-elasticsearch-dsl = "^7.4.0"
-fastapi-cache2 = {extras = ["redis"], version = "^0.1.8"}
-uvicorn = "^0.17.6"
-python-dotenv = "^0.19.2"
-backoff = "^1.11.1"
 psycopg2-binary = "^2.9.3"
 schedule = "^1.1.0"
 aiohttp = "^3.8.1"
@@ -40,7 +31,10 @@ aiofiles = "^0.8.0"
 pytest = "^7.1.1"
 pytest-asyncio = "^0.18.2"
 PyJWT = "^2.3.0"
-
+mypy = "^0.950"
+black = "^22.3.0"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
 
 [tool.black]
 exclude = '''
@@ -79,7 +73,7 @@ ignore_errors = true
 
 
 [tool.pylint.messages_control]
-max-line-length = 88
+max-line-length = 99
 disable = [
     "missing-docstring",
     "too-few-public-methods",
