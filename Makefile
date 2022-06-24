@@ -20,14 +20,12 @@ flake8:
 	flake8 .
 
 pylint:
-	pylint async_service etl
+	pylint async_service
 
 lint: isort black mypy flake8 pylint
 
 
-
-
-
+.PHONY: test
 test:
 	docker-compose -f tests/docker-compose.yml down
 	docker-compose -f tests/docker-compose.yml build

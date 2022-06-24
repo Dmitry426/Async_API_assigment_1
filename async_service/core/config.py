@@ -1,40 +1,57 @@
 import os
 from logging import config as logging_config
 
-from dotenv import load_dotenv
-from pydantic.env_settings import BaseSettings
-from pydantic.fields import Field
+from pydantic import BaseSettings, Field
 
 from async_service.core.logger import LOGGING
-
-logging_config.dictConfig(LOGGING)
-load_dotenv()
 
 logging_config.dictConfig(LOGGING)
 
 
 class EsSettings(BaseSettings):
-    host: str = Field("127.0.0.1", env="ELASTIC_HOST")
-    port: str = Field("5432", env="ELASTIC_PORT")
+    """Represents elastic settings"""
+
+    class Config:
+        env_prefix = "ELASTIC_"
+
+    host: str = "127.0.0.1"
+    port: str = "5432"
 
 
 class RedisSettings(BaseSettings):
-    host: str = Field("127.0.0.1", env="REDIS_HOST")
-    port: str = Field("6379", env="REDIS_PORT")
-    db: int = Field(0, env="REDIS_DB")
-    cache_ttl = Field(3600, env="API_CACHE_TTL")
+    """Represents redis settings"""
+
+    class Config:
+        env_prefix = "REDIS_"
+
+    host: str = "127.0.0.1"
+    port: str = "6379"
+    db: int = 0
+    cache_ttl = 3600
 
 
 class UvicornURL(BaseSettings):
-    host: str = Field("127.0.0.1", env="UVICORN_HOST")
-    port: str = Field("8000", env="UVICORN_PORT")
+    """Represents Uvicorn settings"""
+
+    class Config:
+        env_prefix = "UVICORN_"
+
+    host: str = "127.0.0.1"
+    port: str = "8000"
 
 
 class JwtSettings(BaseSettings):
-    secret_key: str = Field("super-secret-key", env="JWT_SECRET_KEY")
-    algorithm: str = Field("HS256", env="ALGORITHM")
+    """Represents JWT settings"""
+
+    class Config:
+        env_prefix = "JWT_"
+
+    secret_key: str = "super-secret-key"
+    algorithm: str = "HS256"
 
 
 class ProjectSettings(BaseSettings):
-    base_dir: str = Field(os.path.dirname(os.path.abspath(__file__)))
+    """Represents Project settings"""
+
+    base_dir: str = os.path.dirname(os.path.abspath(__file__))
     project_name: str = Field("movies", env="PROJECT_NAME")

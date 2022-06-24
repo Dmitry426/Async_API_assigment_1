@@ -1,7 +1,5 @@
-from pydantic import BaseModel
-from pydantic.validators import UUID
+from .base import UuidModel
 
 
-class Genre(BaseModel):
-    id: UUID
+class Genre(UuidModel):
     name: str

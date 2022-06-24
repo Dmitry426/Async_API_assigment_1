@@ -1,3 +1,6 @@
+version: "3.8"
+
+
 services:
   async_server_test:
     image: async_server
@@ -5,19 +8,27 @@ services:
       context: ..
       target: development
     command: [ "python", "-m", "async_service" ]
+    healthcheck:
+      test: [ "CMD" ,"nc", "-vz", "-w1", "async_server_test", "8000" ]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+    environment:
+      ELASTIC_HOST: "elastic_test"
+      REDIS_HOST: "redis_test"
+      UVICORN_HOST: "async_server_test"
     volumes:
       - "../async_service:/src/async_service"
-    depends_on:
-        - es01_test
-        - redis_server_test
-    environment:
-      - ELASTIC_HOST=es01_test
-      - REDIS_HOST=redis_server_test
-      - UVICORN_HOST=async_server_test
     env_file:
         - ../.env
     ports:
         - '8000:8000'
+    depends_on:
+      redis_test:
+        condition: service_healthy
+      elastic_test:
+        condition: service_healthy
+
 
   test:
     build:
@@ -25,29 +36,51 @@ services:
       target: development
     command: ["pytest", "-v"]
     environment:
-      - ELASTIC_HOST=es01_test
-      - REDIS_HOST=redis_server_test
-      - UVICORN_HOST=async_server_test
+      ELASTIC_HOST: "elastic_test"
+      REDIS_HOST: "redis_test"
+      UVICORN_HOST: "async_server_test"
     env_file:
       - ../.env
     volumes:
        - "./functional:/src/tests"
        - "../pyproject.toml:/src/pyproject.toml"
        - "./testdata:/src/testdata"
-    links:
-      - redis_server_test
-      - es01_test
-      - async_server_test
+       - "film_api_test_logs:/src/logs"
+    depends_on:
+      async_server_test:
+        condition: service_healthy
 
-  es01_test:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+  elastic_test:
+    image: elasticsearch:7.7.0
     environment:
-      - node.name=es01
+      - cluster.name=movies-elasticsearch-cluster
+      - network.host=0.0.0.0
+      - bootstrap.memory_lock=true
       - discovery.type=single-node
-    ports:
-      - 9200:9200
+    healthcheck:
+      test: curl -s http://elastic_test:9200/_cat/health >/dev/null || exit 1
+      interval: 5s
+      timeout: 20s
+      retries: 100
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
 
-  redis_server_test:
-    image: 'redis:alpine'
+  redis_test:
+    image: redis:6-alpine
+    restart: on-failure
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 20s
+      retries: 2
+
+
+
+volumes:
+  film_api_test_logs:

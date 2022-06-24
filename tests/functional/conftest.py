@@ -88,8 +88,9 @@ async def es_client(settings: TestSettings) -> AsyncElasticsearch:
 
 @pytest_asyncio.fixture(name="redis_client", scope="session")
 async def redis_client_fixture(settings: TestSettings) -> aioredis:
+    redis_url = f"{settings.redis_settings.host}:{settings.redis_settings.port}/{settings.redis_settings.db}"
     redis = aioredis.from_url(
-        f"redis://{settings.redis_settings.host}:{settings.redis_settings.port}/{settings.redis_settings.db}",
+        f"redis://{redis_url}",
         encoding="utf8",
         decode_responses=True,
     )

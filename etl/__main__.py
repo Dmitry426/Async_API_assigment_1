@@ -1,3 +1,4 @@
+import logging.config
 from time import sleep
 
 import backoff
@@ -10,7 +11,7 @@ from psycopg2.extras import DictCursor
 from etl.config_validation.config import Config
 from etl.config_validation.db_settings import DSNSettings, ESSettings
 from etl.config_validation.indexes import FilmWork, Genre, Person
-from etl.logger import logger
+from etl.logger import LOGGING
 from etl.migration import UnifiedProcess
 
 config = Config.parse_file("config.json")
@@ -18,6 +19,10 @@ config = Config.parse_file("config.json")
 load_dotenv()
 dsl = DSNSettings().dict()
 es_settings = ESSettings().dict()
+
+logging.config.dictConfig(LOGGING)
+logger = logging.getLogger("postgres_to_es")
+logger.error("service started")
 
 
 class FilmWorkProcess(UnifiedProcess):

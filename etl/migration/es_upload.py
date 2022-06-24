@@ -8,7 +8,7 @@ import backoff
 from elasticsearch import ConnectionError, Elasticsearch
 from elasticsearch.helpers import bulk
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("postgres_to_es")
 
 
 class UUIDEncoder(json.JSONEncoder):
